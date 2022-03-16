@@ -1,0 +1,17 @@
+.idea
+.pytest_cache
+.coverage
+htmlcov
+.nox
+.python-version
+coverage.xml
+
+# byte-compiled / optimized
+__pycache__
+*.pyc
+*.egg-info
+
+# packaging / distribution
+site
+dist
+build
