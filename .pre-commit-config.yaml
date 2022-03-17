@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: poetry run isort ws tests
+        language: system
+        types:
+          - python
+      - id: yapf
+        name: yapf
+        entry: poetry run yapf -r --in-place ws tests
+        language: system
+        types:
+          - python
+      - id: bandit
+        name: bandit
+        entry: poetry run bandit -r ws
+        language: system
+        types:
+          - python
+      - id: flake8
+        name: flake8
+        entry: poetry run flake8
+        language: system
+        types:
+          - python
