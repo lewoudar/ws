@@ -13,9 +13,9 @@ repos:
         language: system
         types:
           - python
-      - id: yapf
-        name: yapf
-        entry: poetry run yapf -r --in-place ws tests
+      - id: black
+        name: black
+        entry: poetry run black ws tests
         language: system
         types:
           - python

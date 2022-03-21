@@ -44,12 +44,9 @@ async def main(filename: str, lines_count: int, follow: bool) -> None:
 
 @click.command()
 @click.argument('filename', type=click.Path(exists=True, dir_okay=False))
-@click.option('-n',
-              'lines_count',
-              type=click.IntRange(min=1),
-              default=10,
-              show_default=True,
-              help='number of lines to print')
+@click.option(
+    '-n', 'lines_count', type=click.IntRange(min=1), default=10, show_default=True, help='number of lines to print'
+)
 @click.option('-f', '--follow', is_flag=True)
 async def tail(filename: str, lines_count: int, follow: bool):
     """
