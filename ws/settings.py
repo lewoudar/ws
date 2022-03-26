@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     connect_timeout: float = 5.0
     disconnect_timeout: float = 5.0
     response_timeout: float = 5.0
+    message_queue_size: int = 1
+    max_message_size: int = 1024 * 1024
+    receive_buffer: int = 4 * 1024
 
     class Config:
         env_prefix = 'ws_'
