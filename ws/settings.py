@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 import tomli
 from pydantic import BaseSettings
@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     message_queue_size: int = 1
     max_message_size: int = 1024 * 1024
     receive_buffer: int = 4 * 1024
+    extra_headers: Optional[Dict[str, str]] = None
 
     class Config:
         env_prefix = 'ws_'

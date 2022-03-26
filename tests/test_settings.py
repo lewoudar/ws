@@ -9,10 +9,12 @@ def test_should_check_default_setting_values():
     assert settings.max_message_size == 1024 * 1024
     assert settings.message_queue_size == 1
     assert settings.receive_buffer == 4 * 1024
+    assert settings.extra_headers is None
 
 
 def test_should_read_values_from_environment(monkeypatch):
     monkeypatch.setenv('WS_CONNECT_TIMEOUT', '1')
+    monkeypatch.setenv('WS_EXTRA_HEADERS', '{"X-Foo": "bar"}')
     monkeypatch.setenv('ws_disconnect_timeout', '3')
     monkeypatch.setenv('WS_message_queue_size', '10')
     settings = Settings()
@@ -21,6 +23,7 @@ def test_should_read_values_from_environment(monkeypatch):
     assert settings.disconnect_timeout == 3.0
     assert settings.response_timeout == 5.0
     assert settings.message_queue_size == 10
+    assert settings.extra_headers == {'X-Foo': 'bar'}
 
 
 class TestGetConfigFromToml:
