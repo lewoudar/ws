@@ -7,7 +7,7 @@ from ws.parameters import ByteParamType, WsUrlParamType, get_normalized_message
 class TestWsUrlParamType:
     """Tests parameter WsUrlParamType"""
 
-    @pytest.mark.parametrize('url', ['ws://websocket', 'https://websocket.com'])
+    @pytest.mark.parametrize('url', ['ws:/websocket', 'https://websocket.com'])
     def test_should_raise_error_when_given_value_is_not_a_websocket_url(self, url):
         param = WsUrlParamType()
 

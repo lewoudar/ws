@@ -6,7 +6,6 @@ from pydantic import AnyUrl, BaseModel, ValidationError
 
 class WsUrl(AnyUrl):
     allowed_schemes = {'ws', 'wss'}
-    tld_required = True
 
 
 class WsUrlModel(BaseModel):
