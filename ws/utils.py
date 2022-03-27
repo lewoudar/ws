@@ -1,11 +1,22 @@
 """Some utility functions for commands"""
+import contextlib
 import io
 import signal
-from typing import Any, AsyncIterator, Callable
+from typing import Any, AsyncIterator, Callable, TypeVar
 
 import anyio
+import asyncclick as click
+import trio
+from trio_websocket import (
+    ConnectionRejected,
+    ConnectionTimeout,
+    DisconnectionTimeout,
+    WebSocketConnection,
+    open_websocket_url,
+)
 
 from ws.console import console
+from ws.settings import get_settings
 
 
 async def signal_handler(scope: anyio.CancelScope) -> None:
@@ -49,3 +60,47 @@ async def reverse_read_lines(file: str) -> AsyncIterator[bytes]:
         # if the buffer is not empty, it is the first line, so we return it
         if buffer:
             yield buffer[::-1]
+
+
+@contextlib.asynccontextmanager
+async def websocket_client(url: str) -> WebSocketConnection:
+    settings = get_settings()
+    arguments = {
+        'connect_timeout': settings.connect_timeout,
+        'disconnect_timeout': settings.disconnect_timeout,
+        'message_queue_size': settings.message_queue_size,
+        'max_message_size': settings.max_message_size,
+        'extra_headers': settings.extra_headers,
+    }
+    try:
+        async with open_websocket_url(url, **arguments) as ws:
+            yield ws
+    except ConnectionTimeout:
+        console.print(f'[error]Unable to connect to {url}')
+        raise click.Abort()
+    except DisconnectionTimeout:
+        console.print(f'[error]Unable to disconnect on time from {url}')
+        raise click.Abort()
+    except ConnectionRejected as e:
+        console.print(f'[error]Connection was rejected by {url}')
+        console.print(f'[label]status code[/] = [info]{e.status_code}[/]')
+        headers = [(key.decode(), value.decode()) for key, value in e.headers] if e.headers is not None else []
+        console.print(f'[label]headers[/] = {headers}')
+        console.print(f'[label]body[/] = [info]{e.body.decode()}[/]')
+
+        raise click.Abort()
+
+
+# Create a generic type helps to preserve type annotations done by static analyzing tools
+FuncCallable = TypeVar('FuncCallable', bound=Callable)
+
+
+def catch_too_slow_error(func: FuncCallable) -> FuncCallable:
+    async def wrapper(*args, **kwargs):
+        try:
+            await func(*args, **kwargs)
+        except trio.TooSlowError:
+            console.print('[error]Unable to get response on time')
+            raise click.Abort()
+
+    return wrapper
