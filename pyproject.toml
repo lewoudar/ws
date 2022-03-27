@@ -38,6 +38,7 @@ flake8 = "^4.0.1"
 cffi = "^1.15.0"
 black = "^22.1.0"
 pytest-mock = "^3.7.0"
+mock = "^4.0.3"
 
 [tool.poetry.scripts]
 ws = "ws.main:cli"
@@ -50,9 +51,6 @@ trio_mode = true
 [tool.isort]
 line_length = 120
 profile = "black"
-
-[tool.yapf]
-column_limit = 120
 
 [tool.black]
 line-length = 120
