@@ -1,3 +1,6 @@
+import pydantic
+import pytest
+
 from ws.settings import Settings, get_config_from_toml, get_settings
 
 
@@ -24,6 +27,32 @@ def test_should_read_values_from_environment(monkeypatch):
     assert settings.response_timeout == 5.0
     assert settings.message_queue_size == 10
     assert settings.extra_headers == {'X-Foo': 'bar'}
+
+
+@pytest.mark.parametrize(
+    'field',
+    [
+        'connect_timeout',
+        'disconnect_timeout',
+        'response_timeout',
+        'message_queue_size',
+        'max_message_size',
+        'receive_buffer',
+    ],
+)
+def test_should_raise_error_when_given_value_is_incorrect(monkeypatch, field):
+    if field == 'message_queue_size':
+        wrong_value = '-1'
+        message = 'greater than or equal to 0'
+    else:
+        wrong_value = '0'
+        message = 'greater than 0'
+    monkeypatch.setenv(f'ws_{field}', wrong_value)
+
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        Settings()
+
+    assert message in str(exc_info.value)
 
 
 class TestGetConfigFromToml:

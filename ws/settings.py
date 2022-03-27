@@ -4,16 +4,16 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import tomli
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    connect_timeout: float = 5.0
-    disconnect_timeout: float = 5.0
-    response_timeout: float = 5.0
-    message_queue_size: int = 1
-    max_message_size: int = 1024 * 1024
-    receive_buffer: int = 4 * 1024
+    connect_timeout: float = Field(5.0, gt=0)
+    disconnect_timeout: float = Field(5.0, gt=0)
+    response_timeout: float = Field(5.0, gt=0)
+    message_queue_size: int = Field(1, ge=0)
+    max_message_size: int = Field(1024 * 1024, gt=0)
+    receive_buffer: int = Field(4 * 1024, gt=0)
     extra_headers: Optional[Dict[str, str]] = None
 
     class Config:
