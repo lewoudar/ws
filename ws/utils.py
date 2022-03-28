@@ -5,7 +5,7 @@ import signal
 from typing import Any, AsyncIterator, Callable, TypeVar
 
 import anyio
-import asyncclick as click
+import click
 import trio
 from trio_websocket import (
     ConnectionRejected,

@@ -1,6 +1,6 @@
 import signal
 
-import asyncclick as click
+import click
 import mock
 import pytest
 import trio
@@ -29,7 +29,7 @@ async def test_should_run_and_kill_given_function_task(autojump_clock, capsys, s
         nursery.start_soon(killer)
 
     # the first test proves that function_runner runs the function passed as second argument
-    assert records == ['echo'] * 6
+    assert records == ['echo'] * 11
     assert capsys.readouterr().out == signal_message(signal.SIGINT)
 
 
@@ -40,6 +40,7 @@ class TestClient:
     async def worker(url):
         async with websocket_client(url) as client:
             await client.send_message('foo')
+            print(await client.get_message())
 
     async def test_should_print_error_when_unable_to_connect_to_server(self, monkeypatch, capsys, autojump_clock):
         monkeypatch.setenv('ws_connect_timeout', '2')
@@ -97,6 +98,12 @@ class TestClient:
         )
 
         assert capsys.readouterr().out == expected
+
+    async def test_should_connect_and_read_message_from_server(self, nursery):
+        await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
+        async with websocket_client('ws://localhost:1234') as client:
+            await client.send_message('foo')
+            assert 'foo' == await client.get_message()
 
 
 class TestCatchSlowError:

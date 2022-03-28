@@ -1,4 +1,4 @@
-import asyncclick as click
+import click
 import pytest
 
 from ws.parameters import ByteParamType, WsUrlParamType, get_normalized_message

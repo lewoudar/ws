@@ -25,18 +25,6 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
-name = "asyncclick"
-version = "8.0.3.2"
-description = "Composable command line interface toolkit, async version"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-colorama = {version = "*", markers = "platform_system == \"Windows\""}
-importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
-
-[[package]]
 name = "atomicwrites"
 version = "1.4.0"
 description = "Atomic file writes."
@@ -123,7 +111,7 @@ python-versions = ">=3.6.1"
 name = "click"
 version = "8.0.4"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -714,7 +702,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "c18c46f9a293fd6f5ee0adc5751c5dc113aa93a55a50064eae6b6c8ae457039e"
+content-hash = "2dd9c607f2a096b2f22d6f7ad9bcc13e0de2d931322cbd6598bfe4acb9c3eb39"
 
 [metadata.files]
 anyio = [
@@ -724,9 +712,6 @@ anyio = [
 async-generator = [
     {file = "async_generator-1.10-py3-none-any.whl", hash = "sha256:01c7bf666359b4967d2cda0000cc2e4af16a0ae098cbffcb8472fb9e8ad6585b"},
     {file = "async_generator-1.10.tar.gz", hash = "sha256:6ebb3d106c12920aaae42ccb6f787ef5eefdcdd166ea3d628fa8476abe712144"},
-]
-asyncclick = [
-    {file = "asyncclick-8.0.3.2.tar.gz", hash = "sha256:251030d8497c139a09d51f8c4b9b8c261a2be0b7d5722f1b7916cc6770368684"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},

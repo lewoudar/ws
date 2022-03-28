@@ -1,6 +1,6 @@
 from typing import AnyStr, Optional
 
-import asyncclick as click
+import click
 from pydantic import AnyUrl, BaseModel, ValidationError
 
 

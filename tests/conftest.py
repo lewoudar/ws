@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
-from asyncclick.testing import CliRunner
+from click.testing import CliRunner
 
 
 @pytest.fixture()

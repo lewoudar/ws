@@ -5,9 +5,12 @@ import threading
 
 import cffi
 import trio
+import trio_websocket
 
 # This snippet code is taken from the trio project, more information can be found here:
 # https://github.com/python-trio/trio/blob/39d01b268b1f354aa0f2290cdddd88fa8c6f6b73/trio/_util.py#L19-L65
+
+
 if platform.system() == 'Windows':
     _ffi = cffi.FFI()
     _ffi.cdef('int raise(int);')
@@ -19,6 +22,17 @@ else:
         signal.pthread_kill(threading.get_ident(), signum)
 
 
-async def killer() -> None:
-    await trio.sleep(5)
+async def killer(*, task_status=trio.TASK_STATUS_IGNORED) -> None:
+    await trio.sleep(10)
     signal_raise(signal.SIGINT)
+    task_status.started()
+
+
+async def server_handler(request) -> None:
+    ws = await request.accept()
+    while True:
+        try:
+            message = await ws.get_message()
+            await ws.send_message(message)
+        except trio_websocket.ConnectionClosed:
+            break

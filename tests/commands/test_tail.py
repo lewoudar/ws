@@ -11,44 +11,44 @@ from ws.commands.tail import main
 from ws.main import cli
 
 
-async def test_should_print_error_when_argument_is_not_given(runner):
-    result = await runner.invoke(cli, ['tail'])
+def test_should_print_error_when_argument_is_not_given(runner):
+    result = runner.invoke(cli, ['tail'])
 
     assert result.exit_code == 2
     assert "Missing argument 'FILENAME'" in result.output
 
 
-async def test_should_print_error_when_argument_is_not_a_file(runner):
-    result = await runner.invoke(cli, ['tail', 'foo'])
+def test_should_print_error_when_argument_is_not_a_file(runner):
+    result = runner.invoke(cli, ['tail', 'foo'])
 
     assert result.exit_code == 2
     assert "File 'foo' does not exist" in result.output
 
 
-async def test_should_print_error_when_lines_option_does_not_have_the_correct_type(runner):
-    result = await runner.invoke(cli, ['tail', '-n', 'foo'])
+def test_should_print_error_when_lines_option_does_not_have_the_correct_type(runner):
+    result = runner.invoke(cli, ['tail', '-n', 'foo'])
 
     assert result.exit_code == 2
     assert "'foo' is not a valid integer range" in result.output
 
 
-async def test_should_print_error_when_lines_option_value_is_out_of_range(runner):
-    result = await runner.invoke(cli, ['tail', '-n', 0])
+def test_should_print_error_when_lines_option_value_is_out_of_range(runner):
+    result = runner.invoke(cli, ['tail', '-n', 0])
 
     assert result.exit_code == 2
     assert '0 is not in the range x>=1'
 
 
-async def test_should_print_the_last_default_lines_of_given_file(runner, file_to_read):
-    result = await runner.invoke(cli, ['tail', f'{file_to_read}'])
+def test_should_print_the_last_default_lines_of_given_file(runner, file_to_read):
+    result = runner.invoke(cli, ['tail', f'{file_to_read}'])
 
     assert result.exit_code == 0
     assert 'I like async concurrency!\n' * 9 + '\n' == result.output
 
 
-async def test_should_print_the_last_given_number_of_lines_of_a_file(runner, file_to_read):
+def test_should_print_the_last_given_number_of_lines_of_a_file(runner, file_to_read):
     count = 15
-    result = await runner.invoke(cli, ['tail', f'{file_to_read}', '-n', 15])
+    result = runner.invoke(cli, ['tail', f'{file_to_read}', '-n', 15])
 
     assert result.exit_code == 0
     assert 'I like async concurrency!\n' * (count - 1) + '\n' == result.output

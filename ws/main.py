@@ -1,5 +1,6 @@
-import asyncclick as click
+import click
 
+from .commands.ping import ping
 from .commands.tail import tail
 
 
@@ -11,5 +12,5 @@ def cli():
     """
 
 
-for command in [tail]:
-    cli.add_command(tail)
+for command in [tail, ping]:
+    cli.add_command(command)  # type: ignore
