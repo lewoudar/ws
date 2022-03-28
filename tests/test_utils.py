@@ -26,10 +26,10 @@ async def test_should_run_and_kill_given_function_task(autojump_clock, capsys, s
     async with trio.open_nursery() as nursery:
         nursery.start_soon(function_runner, nursery.cancel_scope, worker)
         nursery.start_soon(signal_handler, nursery.cancel_scope)
-        nursery.start_soon(killer)
+        nursery.start_soon(killer, 5)
 
     # the first test proves that function_runner runs the function passed as second argument
-    assert records == ['echo'] * 11
+    assert records == ['echo'] * 6
     assert capsys.readouterr().out == signal_message(signal.SIGINT)
 
 

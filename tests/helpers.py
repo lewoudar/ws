@@ -10,7 +10,6 @@ import trio_websocket
 # This snippet code is taken from the trio project, more information can be found here:
 # https://github.com/python-trio/trio/blob/39d01b268b1f354aa0f2290cdddd88fa8c6f6b73/trio/_util.py#L19-L65
 
-
 if platform.system() == 'Windows':
     _ffi = cffi.FFI()
     _ffi.cdef('int raise(int);')
@@ -22,10 +21,9 @@ else:
         signal.pthread_kill(threading.get_ident(), signum)
 
 
-async def killer(*, task_status=trio.TASK_STATUS_IGNORED) -> None:
-    await trio.sleep(10)
+async def killer(seconds: int) -> None:
+    await trio.sleep(seconds)
     signal_raise(signal.SIGINT)
-    task_status.started()
 
 
 async def server_handler(request) -> None:

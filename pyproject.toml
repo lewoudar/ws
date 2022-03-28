@@ -45,7 +45,7 @@ ws = "ws.main:cli"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# addopts = "--cov=ws --cov-report html --cov-report xml"
+addopts = "--cov=ws --cov-report html --cov-report xml"
 trio_mode = true
 
 [tool.isort]
