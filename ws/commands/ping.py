@@ -2,30 +2,23 @@ import click
 import trio
 
 from ws.console import console
-from ws.parameters import WS_URL, ByteParamType
+from ws.options import interval_option, message_option, number_option, url_argument, validate_number
 from ws.settings import get_settings
 from ws.utils import catch_too_slow_error, function_runner, signal_handler, websocket_client
-
-SETTINGS = get_settings()
-
-
-def validate_number(ctx: click.Context, param: click.Parameter, value: int) -> int:
-    if value == 0:
-        raise click.BadParameter('The number of pings cannot be 0')
-    return value
 
 
 @catch_too_slow_error
 async def make_ping(url: str, number: int, interval: float, message: bytes = None) -> None:
+    settings = get_settings()
     # trio_websockets by default sends 32 bytes if no payload is given
     payload_length = len(message) if message is not None else 32
-    console.print(f'PING [blue]{url}[/] with {payload_length} bytes of data')
+    console.print(f'PING [info]{url}[/] with [info]{payload_length}[/] bytes of data')
     counter = 0
     async with websocket_client(url) as client:
         while True:
             counter += 1
             beginning = trio.current_time()
-            with trio.fail_after(SETTINGS.response_timeout):
+            with trio.fail_after(settings.response_timeout):
                 await client.ping(message)
                 duration = trio.current_time() - beginning
                 console.print(f'[label]sequence[/]=[info]{counter}[/], [label]time[/]=[info]{duration:.2f}[/]s')
@@ -43,34 +36,12 @@ async def main(url: str, number: int, interval: float, message: bytes = None) ->
 
 
 @click.command()
-@click.argument('url', type=WS_URL)
-# we choose a length of 125 for the following reasons:
-# - A control frame like ping should not be fragmented
-# - The maximum length to feat the size in one octet in the resulting websocket packet is 125, and it seems a
-# reasonable value to avoid error messages related to message size on the server side
-@click.option(
-    '-m',
-    '--message',
-    type=ByteParamType(max_length=125),
-    help='Message to send in the ping, MUST NOT be more than 125 bytes',
+@url_argument
+@message_option('Message to send in the ping, MUST NOT be more than 125 bytes.')
+@number_option(
+    'Number of pings to make, a negative value means infinite.', validate_number('The number of pings cannot be 0')
 )
-@click.option(
-    '-n',
-    '--number',
-    type=int,
-    default=1,
-    show_default=True,
-    callback=validate_number,
-    help='Number of pings to make, a negative value means infinite.',
-)
-@click.option(
-    '-i',
-    '--interval',
-    type=click.FloatRange(min=0, min_open=True),
-    default=1.0,
-    show_default=True,
-    help='Interval between pings.',
-)
+@interval_option('Interval between pings.')
 def ping(url: str, message: bytes, number: int, interval: int):
     """Pings a websocket server located at URL."""
     trio.run(main, url, number, interval, message)

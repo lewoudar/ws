@@ -1,6 +1,7 @@
 import click
 
 from .commands.ping import ping
+from .commands.pong import pong
 from .commands.tail import tail
 
 
@@ -12,5 +13,5 @@ def cli():
     """
 
 
-for command in [tail, ping]:
-    cli.add_command(command)  # type: ignore
+for command in [tail, ping, pong]:
+    cli.add_command(command)
