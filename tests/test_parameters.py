@@ -1,7 +1,7 @@
 import click
 import pytest
 
-from ws.parameters import ByteParamType, WsUrlParamType, get_normalized_message
+from ws.parameters import ByteParamType, HostParamType, WsUrlParamType, get_normalized_message
 
 
 class TestWsUrlParamType:
@@ -88,3 +88,21 @@ class TestByteParamType:
         param = ByteParamType()
 
         assert param.convert(f'file@{dummy_file}', None, None) == value.encode()
+
+
+class TestHostParamType:
+    """Tests parameter HostParamType"""
+
+    @pytest.mark.parametrize('value', ['Localhost', '123.2.2', 'hello'])
+    def test_should_raise_error_when_value_is_not_a_valid_host(self, value):
+        param = HostParamType()
+
+        with pytest.raises(click.BadParameter) as exc_info:
+            param.convert(value, None, None)
+
+        assert f'{value} is neither "localhost" nor a valid ip address' == str(exc_info.value)
+
+    @pytest.mark.parametrize('value', ['localhost', '192.168.1.1', '::1'])
+    def test_should_return_value_when_it_is_correct(self, value):
+        param = HostParamType()
+        assert param.convert(value, None, None) == value

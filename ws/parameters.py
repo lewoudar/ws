@@ -1,8 +1,10 @@
+import ipaddress
 import re
-from typing import AnyStr, Optional
+from typing import AnyStr, Optional, Union
 
 import click
 from pydantic import AnyUrl, BaseModel, ValidationError
+from typing_extensions import Literal
 
 
 class WsUrl(AnyUrl):
@@ -11,6 +13,10 @@ class WsUrl(AnyUrl):
 
 class WsUrlModel(BaseModel):
     url: WsUrl
+
+
+class HostModel(BaseModel):
+    host: Union[Literal['localhost'], ipaddress.IPv6Address, ipaddress.IPv4Address]
 
 
 class WsUrlParamType(click.ParamType):
@@ -57,4 +63,16 @@ class ByteParamType(click.ParamType):
         return value
 
 
+class HostParamType(click.ParamType):
+    name = 'host'
+
+    def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> str:
+        try:
+            HostModel(host=value)
+            return value
+        except ValidationError:
+            self.fail(f'{value} is neither "localhost" nor a valid ip address')
+
+
 WS_URL = WsUrlParamType()
+HOST = HostParamType()
