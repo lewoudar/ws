@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 import tomli
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 
 class Settings(BaseSettings):
@@ -15,6 +16,12 @@ class Settings(BaseSettings):
     max_message_size: int = Field(1024 * 1024, gt=0)
     receive_buffer: int = Field(4 * 1024, gt=0)
     extra_headers: Optional[Dict[str, str]] = None
+
+    @validator('response_timeout', pre=True)
+    def check_response_timeout(cls, value):
+        if isinstance(value, str) and value.lower() == 'inf':
+            return math.inf
+        return value
 
     class Config:
         env_prefix = 'ws_'
