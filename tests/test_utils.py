@@ -1,6 +1,5 @@
 import signal
 
-import click
 import mock
 import pytest
 import trio
@@ -56,7 +55,7 @@ class TestClient:
                 except ConnectionClosed:
                     break
 
-        with pytest.raises(click.Abort):
+        with pytest.raises(SystemExit):
             async with trio.open_nursery() as nursery:
                 await nursery.start(serve_websocket, echo_handler, '127.0.0.1', 1234, None)
                 nursery.start_soon(self.worker, url)
@@ -68,7 +67,7 @@ class TestClient:
         func_mock.side_effect = DisconnectionTimeout
         url = 'ws://localhost:1234'
 
-        with pytest.raises(click.Abort):
+        with pytest.raises(SystemExit):
             async with trio.open_nursery() as nursery:
                 await nursery.start(serve_websocket, server_handler, '127.0.0.1', 1234, None)
                 nursery.start_soon(self.worker, url)
@@ -85,7 +84,7 @@ class TestClient:
         async def reject_handler(request):
             await request.reject(status_code, extra_headers=headers, body=body)
 
-        with pytest.raises(click.Abort):
+        with pytest.raises(SystemExit):
             async with trio.open_nursery() as nursery:
                 await nursery.start(serve_websocket, reject_handler, 'localhost', 1234, None)
                 nursery.start_soon(self.worker, url)
@@ -115,7 +114,7 @@ class TestCatchSlowError:
             with trio.fail_after(2):
                 await trio.sleep(3)
 
-        with pytest.raises(click.Abort):
+        with pytest.raises(SystemExit):
             async with trio.open_nursery() as nursery:
                 nursery.start_soon(main)
 

@@ -5,7 +5,6 @@ import signal
 from typing import Any, AsyncIterator, Callable, TypeVar
 
 import anyio
-import click
 import trio
 from trio_websocket import (
     ConnectionRejected,
@@ -77,10 +76,10 @@ async def websocket_client(url: str) -> WebSocketConnection:
             yield ws
     except ConnectionTimeout:
         console.print(f'[error]Unable to connect to {url}')
-        raise click.Abort()
+        raise SystemExit(1)
     except DisconnectionTimeout:
         console.print(f'[error]Unable to disconnect on time from {url}')
-        raise click.Abort()
+        raise SystemExit(1)
     except ConnectionRejected as e:
         console.print(f'[error]Connection was rejected by {url}')
         console.print(f'[label]status code[/] = [info]{e.status_code}[/]')
@@ -88,7 +87,7 @@ async def websocket_client(url: str) -> WebSocketConnection:
         console.print(f'[label]headers[/] = {headers}')
         console.print(f'[label]body[/] = [info]{e.body.decode()}[/]')
 
-        raise click.Abort()
+        raise SystemExit(1)
 
 
 # Create a generic type helps to preserve type annotations done by static analyzing tools
@@ -101,6 +100,6 @@ def catch_too_slow_error(func: FuncCallable) -> FuncCallable:
             await func(*args, **kwargs)
         except trio.TooSlowError:
             console.print('[error]Unable to get response on time')
-            raise click.Abort()
+            raise SystemExit(1)
 
     return wrapper
