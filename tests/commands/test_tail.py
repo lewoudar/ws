@@ -54,20 +54,27 @@ def test_should_print_the_last_given_number_of_lines_of_a_file(runner, file_to_r
     assert 'I like async concurrency!\n' * (count - 1) + '\n' == result.output
 
 
-@pytest.mark.skip()
-async def test_should_follow_given_file(capsys, file_to_read, autojump_clock, signal_message):
-    # TODO: understand why this test does not work as expected
+async def test_should_follow_given_file(capsys, file_to_read, signal_message):
     async def update_file(file_path: pathlib.Path) -> None:
         async with await trio.open_file(file_path, 'a') as f:
-            await trio.sleep(1)
+            await trio.sleep(0.2)
             await f.write('hello\n')
-            await trio.sleep(1)
+            await trio.sleep(0.3)
             await f.write('world\n')
 
     async with trio.open_nursery() as nursery:
         nursery.start_soon(main, file_to_read, 10, True)
-        nursery.start_soon(update_file, file_to_read)
-        nursery.start_soon(killer)
+        nursery.start_soon(killer, 1)
+        await update_file(file_to_read)
 
-    expected = 'I like async concurrency\n' * 9 + f'\nhello\nworld\n{signal_message(signal.SIGINT)}'
+    expected = 'I like async concurrency!\n' * 9 + f'\nhello\nworld\n{signal_message(signal.SIGINT)}'
     assert capsys.readouterr().out == expected
+
+
+@pytest.mark.parametrize('follow_option', ['-f', '--follow'])
+def test_should_check_trio_run_is_correctly_called_with_arguments(runner, mocker, file_to_read, follow_option):
+    run_mock = mocker.patch('trio.run')
+    result = runner.invoke(cli, ['tail', f'{file_to_read}', '-n', '12', follow_option])
+
+    assert result.exit_code == 0
+    run_mock.assert_called_once_with(main, f'{file_to_read}', 12, True)

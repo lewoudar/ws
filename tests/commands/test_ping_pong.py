@@ -122,9 +122,10 @@ def test_should_check_trio_run_is_correctly_called_without_arguments(runner, moc
     run_mock.assert_called_once_with(ping_pong, url, 1, 1.0, None)
 
 
-@pytest.mark.parametrize('interval_option', ['-i', '--interval'])
-@pytest.mark.parametrize('number_option', ['-n', '--number'])
-@pytest.mark.parametrize('message_option', ['-m', '--message'])
+@pytest.mark.parametrize(
+    ('interval_option', 'number_option', 'message_option'),
+    [('-i', '-n', '-m'), ('--interval', '--number', '--message')],
+)
 @pytest.mark.parametrize(('command', 'ping_pong'), [('ping', main_ping), ('pong', main_pong)])
 def test_should_check_trio_run_is_correctly_called_with_arguments(
     runner, mocker, interval_option, number_option, message_option, command, ping_pong
