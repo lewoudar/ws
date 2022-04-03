@@ -1,9 +1,12 @@
 import click
+from rich.traceback import install
 
 from .commands.echo_server import echo_server
 from .commands.ping import ping
 from .commands.pong import pong
 from .commands.tail import tail
+
+install(show_locals=True)
 
 
 @click.version_option('0.1.0', message='%(prog)s version %(version)s')
