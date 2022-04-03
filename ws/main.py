@@ -1,5 +1,6 @@
 import click
 
+from .commands.echo_server import echo_server
 from .commands.ping import ping
 from .commands.pong import pong
 from .commands.tail import tail
@@ -13,5 +14,5 @@ def cli():
     """
 
 
-for command in [tail, ping, pong]:
+for command in [tail, ping, pong, echo_server]:
     cli.add_command(command)
