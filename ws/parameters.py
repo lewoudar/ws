@@ -23,7 +23,7 @@ class WsUrlParamType(click.ParamType):
     name = 'websocket url'
 
     def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> str:
-        if re.match(r'^:\d+$', value):
+        if re.match(r':\d+$', value):
             value = f'ws://localhost{value}'
         try:
             WsUrlModel(url=value)
