@@ -97,7 +97,7 @@ async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
     assert 9 <= output.count('b\'{"hello": "world"}\'\n') <= 10
 
 
-def test_should_check_trio_is_correctly_called_without_options(runner, mocker):
+def test_should_check_trio_run_is_correctly_called_without_options(runner, mocker):
     run_mock = mocker.patch('trio.run')
     result = runner.invoke(cli, ['listen', 'ws://localhost:1234'])
 
@@ -106,7 +106,7 @@ def test_should_check_trio_is_correctly_called_without_options(runner, mocker):
 
 
 @pytest.mark.parametrize('json_option', ['-j', '--json'])
-def test_should_check_trio_is_correctly_called_with_options(runner, mocker, json_option):
+def test_should_check_trio_run_is_correctly_called_with_options(runner, mocker, json_option):
     run_mock = mocker.patch('trio.run')
     result = runner.invoke(cli, ['listen', 'ws://localhost:1234', json_option])
 
