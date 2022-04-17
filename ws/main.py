@@ -2,6 +2,7 @@ import click
 from rich.traceback import install
 
 from .commands.echo_server import echo_server
+from .commands.listen import listen
 from .commands.ping import ping
 from .commands.pong import pong
 from .commands.tail import tail
@@ -17,5 +18,5 @@ def cli():
     """
 
 
-for command in [tail, ping, pong, echo_server]:
+for command in [tail, ping, pong, echo_server, listen]:
     cli.add_command(command)

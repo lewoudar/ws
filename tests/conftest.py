@@ -1,3 +1,4 @@
+import io
 import pathlib
 import signal
 import ssl
@@ -6,6 +7,9 @@ from typing import Callable
 import pytest
 import trustme
 from click.testing import CliRunner
+from rich.console import Console
+
+from ws.console import custom_theme
 
 
 @pytest.fixture()
@@ -69,3 +73,9 @@ def private_key(tmp_path, server_cert) -> pathlib.Path:
     key_path = tmp_path / 'key.pem'
     server_cert.private_key_pem.write_to_path(key_path)
     return key_path
+
+
+@pytest.fixture()
+def test_console():
+    """A console designed for tests."""
+    return Console(theme=custom_theme, file=io.StringIO())
