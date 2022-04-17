@@ -76,10 +76,12 @@ async def test_should_read_incoming_messages_with_json_flag(nursery, capsys):
     with trio.move_on_after(1):
         await main('ws://localhost:1234', True)
 
+    # sometimes I have 9 messages, other times 10, probably due to the behaviour of move_on_after or the system
+    # clock
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message at') == 10
-    assert output.count('─ BINARY message at') == 10
-    assert output.count('{\n  "hello": "world"\n}\n') == 20
+    assert 9 <= output.count('─ TEXT message at') <= 10
+    assert 9 <= output.count('─ BINARY message at') <= 10
+    assert 18 <= output.count('{\n  "hello": "world"\n}\n') <= 20
 
 
 async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
@@ -88,10 +90,10 @@ async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
         await main('ws://localhost:1234', False)
 
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message at') == 10
-    assert output.count('{"hello": "world"}\n') == 10
-    assert output.count('─ BINARY message at') == 10
-    assert output.count('b\'{"hello": "world"}\'\n') == 10
+    assert 9 <= output.count('─ TEXT message at') <= 10
+    assert 9 <= output.count('{"hello": "world"}\n') <= 10
+    assert 9 <= output.count('─ BINARY message at') <= 10
+    assert 9 <= output.count('b\'{"hello": "world"}\'\n') <= 10
 
 
 def test_should_check_trio_is_correctly_called_without_options(runner, mocker):
