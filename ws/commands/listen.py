@@ -13,8 +13,7 @@ from ws.utils import function_runner, signal_handler, websocket_client
 
 
 def trace_rule(console: Console, is_bytes: bool) -> None:
-    timestamp = trio.current_time()
-    date = datetime.fromtimestamp(timestamp)
+    date = datetime.now()
     message_type = 'BINARY' if is_bytes else 'TEXT'
 
     console.rule(f'[bold info]{message_type} message at {date:%Y-%m-%d %H:%M:%S}')

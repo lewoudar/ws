@@ -2,6 +2,7 @@ import json
 
 import pytest
 import trio
+from freezegun import freeze_time
 from trio_websocket import ConnectionClosed, WebSocketRequest, serve_websocket
 
 from ws.commands.listen import main, print_json, print_message, trace_rule
@@ -11,9 +12,9 @@ from ws.main import cli
 class TestTraceRule:
     """Tests function trace_rule."""
 
+    @freeze_time('2022-04-14 20:10:00')
     @pytest.mark.parametrize(('is_bytes', 'message_type'), [(False, 'TEXT'), (True, 'BINARY')])
-    def test_should_print_rule_and_message(self, test_console, mocker, is_bytes, message_type):
-        mocker.patch('trio.current_time', return_value=1_649_959_800)
+    def test_should_print_rule_and_message(self, test_console, is_bytes, message_type):
         trace_rule(test_console, is_bytes=is_bytes)
 
         assert f'─ {message_type} message at 2022-04-14 20:10:00 ─' in test_console.file.getvalue()
