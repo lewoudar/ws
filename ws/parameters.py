@@ -63,6 +63,22 @@ class ByteParamType(click.ParamType):
         return value
 
 
+class TextParamType(click.ParamType):
+    name = 'text'
+
+    def __init__(self, max_length: int = None):
+        self._max_length = max_length
+
+    def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> str:
+        original_value = value
+        value = get_normalized_message(value, is_bytes=False)
+        if self._max_length is not None:
+            if value and len(value) > self._max_length:
+                self.fail(f'{original_value} is longer than {self._max_length} characters')
+
+        return value
+
+
 class HostParamType(click.ParamType):
     name = 'host'
 

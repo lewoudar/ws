@@ -1,7 +1,7 @@
 import click
 import pytest
 
-from ws.parameters import ByteParamType, HostParamType, WsUrlParamType, get_normalized_message
+from ws.parameters import ByteParamType, HostParamType, TextParamType, WsUrlParamType, get_normalized_message
 
 
 class TestWsUrlParamType:
@@ -88,6 +88,31 @@ class TestByteParamType:
         param = ByteParamType()
 
         assert param.convert(f'file@{dummy_file}', None, None) == value.encode()
+
+
+class TestTextParamType:
+    """Tests parameter TextParamType"""
+
+    def test_should_raise_error_when_value_length_is_greater_than_given_max_length(self):
+        value = 'a' * 101
+        param = TextParamType(max_length=100)
+
+        with pytest.raises(click.BadParameter) as exc_info:
+            param.convert(value, None, None)
+
+        assert f'{value} is longer than 100 characters' == str(exc_info.value)
+
+    def test_should_return_given_input(self):
+        param = TextParamType()
+        assert param.convert('hello', None, None) == 'hello'
+
+    def test_should_return_file_content_given_file_as_input(self, tmp_path):
+        text = 'Cameroon is a great country!'
+        dummy_file = tmp_path / 'file.txt'
+        dummy_file.write_text(text)
+        param = TextParamType()
+
+        assert param.convert(f'file@{dummy_file}', None, None) == text
 
 
 class TestHostParamType:
