@@ -1,12 +1,12 @@
 import click
 from rich.traceback import install
 
-from .commands.byte import byte
 from .commands.echo_server import echo_server
 from .commands.listen import listen
 from .commands.ping import ping
 from .commands.pong import pong
 from .commands.tail import tail
+from .commands.text_byte import byte, text
 
 install(show_locals=True)
 
@@ -19,5 +19,5 @@ def cli():
     """
 
 
-for command in [tail, ping, pong, echo_server, listen, byte]:
+for command in [tail, ping, pong, echo_server, listen, byte, text]:
     cli.add_command(command)
