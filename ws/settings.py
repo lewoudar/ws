@@ -4,8 +4,11 @@ import math
 from pathlib import Path
 from typing import Dict, Optional, Union
 
+import dotenv
 import tomli
 from pydantic import BaseSettings, Field, validator
+
+ENV_FILE = '.ws.env'
 
 
 class Settings(BaseSettings):
@@ -40,9 +43,11 @@ def get_config_from_toml(filename: Union[str, Path]) -> Optional[dict[str, float
 
 def get_settings() -> Settings:
     pyproject_file = Path.cwd() / 'pyproject.toml'
-    settings = Settings()
+    local_env_file = Path.cwd() / ENV_FILE
+    home_env_file = Path.home() / ENV_FILE
 
     if pyproject_file.exists():
+        settings = Settings()
         config = get_config_from_toml(pyproject_file)
         if config is None:
             return settings
@@ -51,4 +56,14 @@ def get_settings() -> Settings:
             if item in config:
                 setattr(settings, item, config[item])
 
-    return settings
+        return settings
+
+    if local_env_file.exists():
+        dotenv.load_dotenv(dotenv_path=local_env_file)
+        return Settings()
+
+    if home_env_file.exists():
+        dotenv.load_dotenv(dotenv_path=home_env_file)
+        return Settings()
+
+    return Settings()

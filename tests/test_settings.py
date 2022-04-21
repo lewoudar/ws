@@ -1,9 +1,10 @@
 import math
+import os
 
 import pydantic
 import pytest
 
-from ws.settings import Settings, get_config_from_toml, get_settings
+from ws.settings import ENV_FILE, Settings, get_config_from_toml, get_settings
 
 
 def test_should_check_default_setting_values():
@@ -59,6 +60,14 @@ def test_should_raise_error_when_given_value_is_incorrect(monkeypatch, field):
     assert message in str(exc_info.value)
 
 
+@pytest.fixture()
+def clean_environment():
+    """Helps to have a clean environment for tests."""
+    os.environ.pop('WS_CONNECT_TIMEOUT', None)
+    os.environ.pop('ws_disconnect_timeout', None)
+    yield
+
+
 class TestGetConfigFromToml:
     """Tests function get_config_from_toml"""
 
@@ -93,7 +102,7 @@ class TestGetSettings:
 
         assert settings == Settings()
 
-    def test_should_return_default_settings_when_config_file_does_not_contain_ws_config(self, tmp_path, mocker):
+    def test_should_return_default_settings_when_toml_file_does_not_contain_ws_config(self, tmp_path, mocker):
         mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
         content = 'hello = "world"\n'
         config_file = tmp_path / 'pyproject.toml'
@@ -102,9 +111,20 @@ class TestGetSettings:
 
         assert settings == Settings()
 
-    def test_should_return_settings_with_values_pulled_from_config_file(self, tmp_path, mocker):
+    @pytest.mark.parametrize('path_to_mock', ['pathlib.Path.cwd', 'pathlib.Path.home'])
+    def test_should_return_default_settings_when_env_file_does_not_contain_ws_config(
+        self, tmp_path, mocker, path_to_mock
+    ):
+        mocker.patch(path_to_mock, return_value=tmp_path)
+        env_file = tmp_path / ENV_FILE
+        env_file.write_text('foo=bar\n')
+        settings = get_settings()
+
+        assert settings == Settings()
+
+    def test_should_return_settings_with_values_pulled_from_toml_file(self, tmp_path, mocker):
         mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
-        content = '[tool.ws]\n' 'connect_timeout=3.0\n' 'response_timeout=4.0\n' 'fake_setting=2\n'
+        content = '[tool.ws]\nconnect_timeout=3.0\nresponse_timeout=4.0\nfake_setting=2\n'
         config_file = tmp_path / 'pyproject.toml'
         config_file.write_text(content)
         settings = get_settings()
@@ -113,15 +133,55 @@ class TestGetSettings:
         assert settings.disconnect_timeout == 5.0
         assert settings.response_timeout == 4.0
 
-    def test_should_check_function_prioritizes_config_file_over_environment(self, tmp_path, monkeypatch, mocker):
+    @pytest.mark.parametrize('path_to_mock', ['pathlib.Path.cwd', 'pathlib.Path.home'])
+    def test_should_read_values_from_env_file(self, tmp_path, mocker, path_to_mock):
+        mocker.patch(path_to_mock, return_value=tmp_path)
+        content = 'WS_CONNECT_TIMEOUT=1\n' 'ws_disconnect_timeout=3\n' 'foo=bar\n'
+        env_file = tmp_path / ENV_FILE
+        env_file.write_text(content)
+        settings = get_settings()
+
+        assert settings.connect_timeout == 1.0
+        assert settings.disconnect_timeout == 3.0
+
+    # the previous test sets environment variables, this is why we need the following fixture
+    # it makes some kind of dependency between tests, but I don't think it is a big deal here
+    @pytest.mark.usefixtures('clean_environment')
+    def test_should_check_function_prioritizes_toml_file_over_environment(self, tmp_path, monkeypatch, mocker):
         mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
         monkeypatch.setenv('WS_CONNECT_TIMEOUT', '2')
-        content = '[tool.ws]\n' 'connect_timeout=3.0\n' 'response_timeout=4.0\n' 'fake_setting=2\n'
         config_file = tmp_path / 'pyproject.toml'
-        config_file.write_text(content)
+        config_file.write_text('[tool.ws]\nconnect_timeout=3.0\nresponse_timeout=4.0\nfake_setting=2\n')
         settings = get_settings()
 
-        # connect_timeout must be 3 and not 2
+        # connect_timeout must be 3 and not 2 because toml file has priority over environment variables
         assert settings.connect_timeout == 3.0
         assert settings.disconnect_timeout == 5.0
         assert settings.response_timeout == 4.0
+
+    def test_should_check_function_prioritizes_toml_file_over_env_file(self, tmp_path, mocker):
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
+        toml_file = tmp_path / 'pyproject.toml'
+        toml_file.write_text('[tool.ws]\nconnect_timeout=3.0\nresponse_timeout=4.0\nfake_setting=2\n')
+        env_file = tmp_path / ENV_FILE
+        env_file.write_text('WS_CONNECT_TIMEOUT=4\nWS_DISCONNECT_TIMEOUT=3\n')
+
+        settings = get_settings()
+
+        assert settings.connect_timeout == 3.0  # note that it is 3 here instead of 4
+        assert settings.disconnect_timeout == 5.0  # 5 instead of 3 because env file was never opened
+
+    def test_should_check_function_prioritizes_local_env_file_to_home_env_file(self, tmp_path, mocker):
+        home = tmp_path / 'home'
+        home.mkdir()
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
+        mocker.patch('pathlib.Path.home', return_value=home)
+        local_env_file = tmp_path / ENV_FILE
+        home_env_file = home / ENV_FILE
+
+        local_env_file.write_text('WS_CONNECT_TIMEOUT=4\n')
+        home_env_file.write_text('WS_CONNECT_TIMEOUT=2\nWS_DISCONNECT_TIMEOUT=3\n')
+        settings = get_settings()
+
+        assert settings.connect_timeout == 4.0  # 4 instead of 2 because local env file has priority
+        assert settings.disconnect_timeout == 5.0  # 5 instead of 3 because home env file was never opened
