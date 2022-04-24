@@ -5,6 +5,7 @@ import signal
 from typing import Any, AsyncIterator, Callable, TypeVar
 
 import anyio
+import pydantic
 import trio
 from trio_websocket import (
     ConnectionRejected,
@@ -63,7 +64,12 @@ async def reverse_read_lines(file: str) -> AsyncIterator[bytes]:
 
 @contextlib.asynccontextmanager
 async def websocket_client(url: str) -> WebSocketConnection:
-    settings = get_settings()
+    try:
+        settings = get_settings()
+    except pydantic.ValidationError as e:
+        console.print(f'[error]{e}')
+        raise SystemExit(1)
+
     arguments = {
         'connect_timeout': settings.connect_timeout,
         'disconnect_timeout': settings.disconnect_timeout,
@@ -100,6 +106,17 @@ def catch_too_slow_error(func: FuncCallable) -> FuncCallable:
             await func(*args, **kwargs)
         except trio.TooSlowError:
             console.print('[error]Unable to get response on time')
+            raise SystemExit(1)
+
+    return wrapper
+
+
+def catch_pydantic_error(func: FuncCallable) -> FuncCallable:
+    async def wrapper(*args, **kwargs):
+        try:
+            await func(*args, **kwargs)
+        except pydantic.ValidationError as e:
+            console.print(f'[error]{e}')
             raise SystemExit(1)
 
     return wrapper

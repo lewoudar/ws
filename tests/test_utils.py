@@ -6,7 +6,15 @@ import trio
 from trio_websocket import ConnectionClosed, DisconnectionTimeout, serve_websocket
 
 from tests.helpers import killer, server_handler
-from ws.utils import catch_too_slow_error, function_runner, reverse_read_lines, signal_handler, websocket_client
+from ws.settings import get_settings
+from ws.utils import (
+    catch_pydantic_error,
+    catch_too_slow_error,
+    function_runner,
+    reverse_read_lines,
+    signal_handler,
+    websocket_client,
+)
 
 
 async def test_should_read_file_in_reverse_order(file_to_read):
@@ -30,6 +38,34 @@ async def test_should_run_and_kill_given_function_task(autojump_clock, capsys, s
     # the first test proves that function_runner runs the function passed as second argument
     assert records == ['echo'] * 6
     assert capsys.readouterr().out == signal_message(signal.SIGINT)
+
+
+class TestCatchPydanticError:
+    """Tests function catch_pydantic_error"""
+
+    async def test_should_raise_system_error_when_program_raise_pydantic_error(self, monkeypatch, capsys):
+        @catch_pydantic_error
+        async def main():
+            monkeypatch.setenv('WS_CONNECT_TIMEOUT', 'foo')
+            print(get_settings())
+
+        with pytest.raises(SystemExit):
+            async with trio.open_nursery() as nursery:
+                nursery.start_soon(main)
+
+        output = capsys.readouterr().out
+        assert 'connect_timeout' in output
+        assert 'not a valid float' in output
+
+    async def test_should_not_raise_error_when_program_runs_correctly(self, capsys):
+        @catch_pydantic_error
+        async def main():
+            print(get_settings())
+
+        async with trio.open_nursery() as nursery:
+            nursery.start_soon(main)
+
+        assert 'not a valid float' not in capsys.readouterr().out
 
 
 class TestClient:
@@ -98,6 +134,16 @@ class TestClient:
 
         assert capsys.readouterr().out == expected
 
+    async def test_should_print_error_when_settings_are_badly_configured(self, capsys, monkeypatch):
+        monkeypatch.setenv('WS_CONNECT_TIMEOUT', 'foo')
+        with pytest.raises(SystemExit):
+            async with websocket_client('ws://localhost:1234') as client:
+                await client.send_message('foo')
+
+        output = capsys.readouterr().out
+        assert 'connect_timeout' in output
+        assert 'not a valid float' in output
+
     async def test_should_connect_and_read_message_from_server(self, nursery):
         await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
         async with websocket_client('ws://localhost:1234') as client:
@@ -108,7 +154,7 @@ class TestClient:
 class TestCatchSlowError:
     """Tests function catch_slow_error."""
 
-    async def test_should_raise_print_error_when_program_raises_timeout_error(self, capsys, autojump_clock):
+    async def test_should_raise_system_error_when_program_raises_timeout_error(self, capsys, autojump_clock):
         @catch_too_slow_error
         async def main():
             with trio.fail_after(2):
@@ -120,7 +166,7 @@ class TestCatchSlowError:
 
         assert capsys.readouterr().out == 'Unable to get response on time\n'
 
-    async def test_should_not_print_error_when_program_runs_normally(self, capsys, autojump_clock):
+    async def test_should_not_raise_or_print_error_when_program_runs_normally(self, capsys, autojump_clock):
         @catch_too_slow_error
         async def main():
             with trio.fail_after(2):

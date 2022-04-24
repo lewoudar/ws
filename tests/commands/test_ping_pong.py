@@ -63,6 +63,15 @@ def test_should_print_error_when_interval_is_not_in_the_valid_range(runner, inte
     assert 'is not in the range x>0' in result.output
 
 
+def test_should_print_error_when_ping_settings_are_not_correct(monkeypatch, runner):
+    monkeypatch.setenv('WS_CONNECT_TIMEOUT', 'foo')
+    result = runner.invoke(cli, ['ping', 'ws://websocket.com'])
+
+    assert result.exit_code == 1
+    assert 'connect_timeout' in result.output
+    assert 'not a valid float' in result.output
+
+
 async def test_should_make_a_one_ping_with_default_values(capsys, nursery):
     interval = 1.0
     number = 1

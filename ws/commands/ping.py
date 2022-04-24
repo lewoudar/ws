@@ -4,10 +4,11 @@ import trio
 from ws.console import console
 from ws.options import interval_option, message_option, number_option, url_argument, validate_number
 from ws.settings import get_settings
-from ws.utils import catch_too_slow_error, function_runner, signal_handler, websocket_client
+from ws.utils import catch_pydantic_error, catch_too_slow_error, function_runner, signal_handler, websocket_client
 
 
 @catch_too_slow_error
+@catch_pydantic_error
 async def make_ping(url: str, number: int, interval: float, message: bytes = None) -> None:
     settings = get_settings()
     # trio_websockets by default sends 32 bytes if no payload is given
