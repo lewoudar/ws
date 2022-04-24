@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 
 import dotenv
 import tomli
-from pydantic import BaseSettings, Field, validator
+from pydantic import BaseSettings, Field, FilePath, validator
 
 ENV_FILE = '.ws.env'
 
@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     max_message_size: int = Field(1024 * 1024, gt=0)
     receive_buffer: int = Field(4 * 1024, gt=0)
     extra_headers: Optional[Dict[str, str]] = None
+    tls_ca_file: Optional[FilePath] = None
+    tls_certificate_file: Optional[FilePath] = None
+    tls_key_file: Optional[FilePath] = None
+    tls_password: Optional[str] = None
 
     @validator('response_timeout', pre=True)
     def check_response_timeout(cls, value):

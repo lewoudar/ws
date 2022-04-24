@@ -16,14 +16,21 @@ def test_should_check_default_setting_values():
     assert settings.message_queue_size == 1
     assert settings.receive_buffer == 4 * 1024
     assert settings.extra_headers is None
+    assert settings.tls_ca_file is None
+    assert settings.tls_certificate_file is None
+    assert settings.tls_key_file is None
+    assert settings.tls_password is None
 
 
-def test_should_read_values_from_environment(monkeypatch):
+def test_should_read_values_from_environment(monkeypatch, tmp_path):
+    ca = tmp_path / 'ca.pem'
+    ca.write_text('fake ca')
     monkeypatch.setenv('WS_CONNECT_TIMEOUT', '1')
     monkeypatch.setenv('WS_RESPONSE_TIMEOUT', 'inf')
     monkeypatch.setenv('WS_EXTRA_HEADERS', '{"X-Foo": "bar"}')
     monkeypatch.setenv('ws_disconnect_timeout', '3')
     monkeypatch.setenv('WS_message_queue_size', '10')
+    monkeypatch.setenv('ws_tls_ca_file', f'{ca}')
     settings = Settings()
 
     assert settings.connect_timeout == 1.0
@@ -31,6 +38,7 @@ def test_should_read_values_from_environment(monkeypatch):
     assert settings.response_timeout is math.inf
     assert settings.message_queue_size == 10
     assert settings.extra_headers == {'X-Foo': 'bar'}
+    assert settings.tls_ca_file == ca
     assert settings.max_message_size == 1024 * 1024  # default value not changed
 
 
@@ -63,9 +71,24 @@ def test_should_raise_error_when_given_value_is_incorrect(monkeypatch, field):
 @pytest.fixture()
 def clean_environment():
     """Helps to have a clean environment for tests."""
-    os.environ.pop('WS_CONNECT_TIMEOUT', None)
-    os.environ.pop('ws_disconnect_timeout', None)
+    for item in ['WS_CONNECT_TIMEOUT', 'WS_TLS_CERTIFICATE_FILE', 'ws_disconnect_timeout']:
+        if item in os.environ:
+            del os.environ[item]
+
     yield
+
+
+class FakeEnviron:
+    def __init__(self, monkeypatch):
+        self._items = {}
+        self._monkeypatch = monkeypatch
+
+    def __getitem__(self, item):
+        return self._items[item]
+
+    def __setitem__(self, key, value):
+        self._items[key] = value
+        self._monkeypatch.setenv(key, value)
 
 
 class TestGetConfigFromToml:
@@ -111,16 +134,29 @@ class TestGetSettings:
 
         assert settings == Settings()
 
-    @pytest.mark.parametrize('path_to_mock', ['pathlib.Path.cwd', 'pathlib.Path.home'])
-    def test_should_return_default_settings_when_env_file_does_not_contain_ws_config(
-        self, tmp_path, mocker, path_to_mock
-    ):
-        mocker.patch(path_to_mock, return_value=tmp_path)
+    def test_should_return_default_settings_when_local_env_file_does_not_contain_ws_config(self, tmp_path, mocker):
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
         env_file = tmp_path / ENV_FILE
         env_file.write_text('foo=bar\n')
         settings = get_settings()
 
         assert settings == Settings()
+
+    def test_should_return_default_settings_when_home_env_file_does_not_contain_ws_config(self, tmp_path, mocker):
+        home = tmp_path / 'home'
+        home.mkdir()
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
+        env_file = home / ENV_FILE
+        env_file.write_text('foo=bar\n')
+        settings = get_settings()
+
+        assert settings == Settings()
+
+    def test_should_return_default_settings_when_no_configuration_file_exist(self, tmp_path, mocker):
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
+        mocker.patch('pathlib.Path.home', return_value=tmp_path)
+
+        assert get_settings() == Settings()
 
     def test_should_return_settings_with_values_pulled_from_toml_file(self, tmp_path, mocker):
         mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
@@ -133,10 +169,9 @@ class TestGetSettings:
         assert settings.disconnect_timeout == 5.0
         assert settings.response_timeout == 4.0
 
-    @pytest.mark.parametrize('path_to_mock', ['pathlib.Path.cwd', 'pathlib.Path.home'])
-    def test_should_read_values_from_env_file(self, tmp_path, mocker, path_to_mock):
-        mocker.patch(path_to_mock, return_value=tmp_path)
-        content = 'WS_CONNECT_TIMEOUT=1\n' 'ws_disconnect_timeout=3\n' 'foo=bar\n'
+    def test_should_read_values_from_local_env_file(self, tmp_path, monkeypatch, mocker):
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
+        content = 'WS_CONNECT_TIMEOUT=1\nws_disconnect_timeout=3\nfoo=bar\n'
         env_file = tmp_path / ENV_FILE
         env_file.write_text(content)
         settings = get_settings()
@@ -144,8 +179,26 @@ class TestGetSettings:
         assert settings.connect_timeout == 1.0
         assert settings.disconnect_timeout == 3.0
 
-    # the previous test sets environment variables, this is why we need the following fixture
+    # the previous test sets environment variables (python-dotenv), this is why we need the following fixture
     # it makes some kind of dependency between tests, but I don't think it is a big deal here
+    @pytest.mark.usefixtures('clean_environment')
+    def test_should_read_values_from_home_env_file(self, tmp_path, mocker):
+        home = tmp_path / 'home'
+        home.mkdir()
+        mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
+        mocker.patch('pathlib.Path.home', return_value=home)
+        cert = tmp_path / 'cert.pem'
+        cert.touch()
+        content = f'WS_CONNECT_TIMEOUT=1\nWS_TLS_CERTIFICATE_FILE={cert}\nws_disconnect_timeout=3\nfoo=bar\n'
+        env_file = home / ENV_FILE
+        env_file.write_text(content)
+        settings = get_settings()
+
+        assert settings.connect_timeout == 1.0
+        assert settings.disconnect_timeout == 3.0
+        assert settings.tls_certificate_file == cert
+
+    # the previous comment also applies here
     @pytest.mark.usefixtures('clean_environment')
     def test_should_check_function_prioritizes_toml_file_over_environment(self, tmp_path, monkeypatch, mocker):
         mocker.patch('pathlib.Path.cwd', return_value=tmp_path)
