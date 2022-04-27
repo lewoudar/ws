@@ -2,7 +2,8 @@
 import contextlib
 import io
 import signal
-from typing import Any, AsyncIterator, Callable, TypeVar
+import ssl
+from typing import Any, AsyncIterator, Callable, Optional, TypeVar
 
 import anyio
 import pydantic
@@ -93,6 +94,46 @@ async def websocket_client(url: str) -> WebSocketConnection:
         console.print(f'[label]headers[/] = {headers}')
         console.print(f'[label]body[/] = [info]{e.body.decode()}[/]')
 
+        raise SystemExit(1)
+
+
+def get_client_ssl_context(
+    ca_file: str = None, certificate: str = None, keyfile: str = None, password: str = None
+) -> Optional[ssl.SSLContext]:
+    if ca_file:
+        try:
+            # noinspection PyTypeChecker
+            context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=ca_file)
+        except ssl.SSLError:
+            console.print(f'[error]Unable to load certificate(s) located in the (tls_ca_file) file {ca_file}')
+            raise SystemExit(1)
+        return context
+
+    if certificate:
+        additional_arguments = {}
+        if keyfile:
+            additional_arguments['keyfile'] = keyfile
+        if password:
+            additional_arguments['password'] = password
+        # noinspection PyTypeChecker
+        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        try:
+            context.load_cert_chain(certificate, **additional_arguments)
+        except ssl.SSLError:
+            message = (
+                'Unable to load the certificate with the provided information.\n'
+                'Please check tls_certificate_file and eventually tls_key_file and tls_password'
+            )
+            console.print(f'[error]{message}')
+            raise SystemExit(1)
+        return context
+
+    if keyfile:
+        console.print('[error]You provided tls_key_file without tls_certificate_file')
+        raise SystemExit(1)
+
+    if password:
+        console.print('[error]You provided tls_password without tls_key_file and tls_certificate_file')
         raise SystemExit(1)
 
 

@@ -1,4 +1,6 @@
 import signal
+import ssl
+from unittest.mock import call
 
 import mock
 import pytest
@@ -11,6 +13,7 @@ from ws.utils import (
     catch_pydantic_error,
     catch_too_slow_error,
     function_runner,
+    get_client_ssl_context,
     reverse_read_lines,
     signal_handler,
     websocket_client,
@@ -38,34 +41,6 @@ async def test_should_run_and_kill_given_function_task(autojump_clock, capsys, s
     # the first test proves that function_runner runs the function passed as second argument
     assert records == ['echo'] * 6
     assert capsys.readouterr().out == signal_message(signal.SIGINT)
-
-
-class TestCatchPydanticError:
-    """Tests function catch_pydantic_error"""
-
-    async def test_should_raise_system_error_when_program_raise_pydantic_error(self, monkeypatch, capsys):
-        @catch_pydantic_error
-        async def main():
-            monkeypatch.setenv('WS_CONNECT_TIMEOUT', 'foo')
-            print(get_settings())
-
-        with pytest.raises(SystemExit):
-            async with trio.open_nursery() as nursery:
-                nursery.start_soon(main)
-
-        output = capsys.readouterr().out
-        assert 'connect_timeout' in output
-        assert 'not a valid float' in output
-
-    async def test_should_not_raise_error_when_program_runs_correctly(self, capsys):
-        @catch_pydantic_error
-        async def main():
-            print(get_settings())
-
-        async with trio.open_nursery() as nursery:
-            nursery.start_soon(main)
-
-        assert 'not a valid float' not in capsys.readouterr().out
 
 
 class TestClient:
@@ -151,6 +126,77 @@ class TestClient:
             assert 'foo' == await client.get_message()
 
 
+class TestGetClientSSLContext:
+    """Tests function get_client_ssl_context."""
+
+    def test_should_return_none_when_ca_and_certificate_are_none(self):
+        assert get_client_ssl_context(ca_file=None, certificate=None) is None
+
+    def test_should_raise_system_error_when_there_is_an_issue_with_ca_file(self, tmp_path, capsys):
+        ca_file = tmp_path / 'ca.pem'
+        ca_file.write_text('fake ca')
+
+        with pytest.raises(SystemExit):
+            get_client_ssl_context(ca_file=f'{ca_file}')
+
+        # rich tries to determine the size of the terminal before writing to it. With my experiences
+        # I noticed that this means sometimes a '\n' can be inserted in the message displayed, this is why I don't
+        # check the whole message at one
+        output = capsys.readouterr().out
+        assert 'Unable to load certificate(s) located in the (tls_ca_file)' in output
+        assert f'{ca_file}\n' in output
+
+    def test_should_return_ssl_context_when_ca_file_is_provided(self, tmp_path, ca):
+        ca_file = tmp_path / 'ca.pem'
+        ca.cert_pem.write_to_path(f'{ca_file}')
+        context = get_client_ssl_context(ca_file=f'{ca_file}')
+
+        assert isinstance(context, ssl.SSLContext)
+
+    def test_should_raise_system_error_when_certificate_is_not_correct(self, tmp_path, capsys):
+        cert = tmp_path / 'cert.pem'
+        cert.write_text('fake cert')
+
+        with pytest.raises(SystemExit):
+            get_client_ssl_context(certificate=f'{cert}')
+
+        output = capsys.readouterr().out
+        assert 'Unable to load the certificate with the provided information.\n' in output
+        assert 'Please check tls_certificate_file and eventually tls_key_file and tls_password\n' in output
+
+    def test_should_raise_system_error_when_keyfile_is_provided_without_certificate(self, capsys, private_key):
+        with pytest.raises(SystemExit):
+            get_client_ssl_context(keyfile=f'{private_key}')
+
+        assert capsys.readouterr().out == 'You provided tls_key_file without tls_certificate_file\n'
+
+    def test_should_raise_system_error_when_only_password_is_provided(self, capsys):
+        with pytest.raises(SystemExit):
+            get_client_ssl_context(password='pass')
+
+        assert capsys.readouterr().out == 'You provided tls_password without tls_key_file and tls_certificate_file\n'
+
+    def test_should_return_ssl_context_when_certificate_is_provided_without_key_file(self, tmp_path, certificate):
+        context = get_client_ssl_context(certificate=f'{certificate}')
+        assert isinstance(context, ssl.SSLContext)
+
+    def test_should_return_ssl_context_when_certificate_is_provided_with_key_file(
+        self, tmp_path, certificate, private_key
+    ):
+        context = get_client_ssl_context(certificate=f'{certificate}', keyfile=f'{private_key}')
+        assert isinstance(context, ssl.SSLContext)
+
+    # I don't want to bother myself with cryptography to create a cert with a password, so I just test
+    # the call is correctly done
+    def test_should_correctly_call_ssl_function_with_cert_key_and_password(self, mocker, certificate, private_key):
+        func_mock = mocker.patch('ssl.create_default_context')
+        get_client_ssl_context(certificate=f'{certificate}', keyfile=f'{private_key}', password='pass')
+
+        func_mock.assert_called_once()
+        call_list = [call().load_cert_chain(f'{certificate}', keyfile=f'{private_key}', password='pass')]
+        func_mock.assert_has_calls(call_list)
+
+
 class TestCatchSlowError:
     """Tests function catch_slow_error."""
 
@@ -176,3 +222,31 @@ class TestCatchSlowError:
             nursery.start_soon(main)
 
         assert capsys.readouterr().out == ''
+
+
+class TestCatchPydanticError:
+    """Tests function catch_pydantic_error"""
+
+    async def test_should_raise_system_error_when_program_raise_pydantic_error(self, monkeypatch, capsys):
+        @catch_pydantic_error
+        async def main():
+            monkeypatch.setenv('WS_CONNECT_TIMEOUT', 'foo')
+            print(get_settings())
+
+        with pytest.raises(SystemExit):
+            async with trio.open_nursery() as nursery:
+                nursery.start_soon(main)
+
+        output = capsys.readouterr().out
+        assert 'connect_timeout' in output
+        assert 'not a valid float' in output
+
+    async def test_should_not_raise_error_when_program_runs_correctly(self, capsys):
+        @catch_pydantic_error
+        async def main():
+            print(get_settings())
+
+        async with trio.open_nursery() as nursery:
+            nursery.start_soon(main)
+
+        assert 'not a valid float' not in capsys.readouterr().out
