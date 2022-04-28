@@ -27,6 +27,7 @@ pydantic = "^1.9.0"
 tomli = "^2.0.1"
 click = "^8.0.4"
 python-dotenv = "^0.20.0"
+certifi = "^2021.10.8"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.0"
