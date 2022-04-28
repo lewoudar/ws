@@ -59,6 +59,15 @@ def server_cert(ca) -> trustme.LeafCert:
     return ca.issue_cert('localhost')
 
 
+@pytest.fixture(scope='session')
+def server_context(server_cert):
+    """Server SSLContext used in tests."""
+    # noinspection PyTypeChecker
+    server_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    server_cert.configure_cert(server_context)
+    return server_context
+
+
 @pytest.fixture()
 def certificate(tmp_path, server_cert) -> pathlib.Path:
     """Path to a certificate file used in tests."""

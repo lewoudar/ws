@@ -63,40 +63,6 @@ async def reverse_read_lines(file: str) -> AsyncIterator[bytes]:
             yield buffer[::-1]
 
 
-@contextlib.asynccontextmanager
-async def websocket_client(url: str) -> WebSocketConnection:
-    try:
-        settings = get_settings()
-    except pydantic.ValidationError as e:
-        console.print(f'[error]{e}')
-        raise SystemExit(1)
-
-    arguments = {
-        'connect_timeout': settings.connect_timeout,
-        'disconnect_timeout': settings.disconnect_timeout,
-        'message_queue_size': settings.message_queue_size,
-        'max_message_size': settings.max_message_size,
-        'extra_headers': settings.extra_headers,
-    }
-    try:
-        async with open_websocket_url(url, **arguments) as ws:
-            yield ws
-    except ConnectionTimeout:
-        console.print(f'[error]Unable to connect to {url}')
-        raise SystemExit(1)
-    except DisconnectionTimeout:
-        console.print(f'[error]Unable to disconnect on time from {url}')
-        raise SystemExit(1)
-    except ConnectionRejected as e:
-        console.print(f'[error]Connection was rejected by {url}')
-        console.print(f'[label]status code[/] = [info]{e.status_code}[/]')
-        headers = [(key.decode(), value.decode()) for key, value in e.headers] if e.headers is not None else []
-        console.print(f'[label]headers[/] = {headers}')
-        console.print(f'[label]body[/] = [info]{e.body.decode()}[/]')
-
-        raise SystemExit(1)
-
-
 def get_client_ssl_context(
     ca_file: str = None, certificate: str = None, keyfile: str = None, password: str = None
 ) -> Optional[ssl.SSLContext]:
@@ -134,6 +100,47 @@ def get_client_ssl_context(
 
     if password:
         console.print('[error]You provided tls_password without tls_key_file and tls_certificate_file')
+        raise SystemExit(1)
+
+
+@contextlib.asynccontextmanager
+async def websocket_client(url: str) -> WebSocketConnection:
+    try:
+        settings = get_settings()
+    except pydantic.ValidationError as e:
+        console.print(f'[error]{e}')
+        raise SystemExit(1)
+
+    arguments = {
+        'connect_timeout': settings.connect_timeout,
+        'disconnect_timeout': settings.disconnect_timeout,
+        'message_queue_size': settings.message_queue_size,
+        'max_message_size': settings.max_message_size,
+        'extra_headers': settings.extra_headers,
+    }
+    ssl_context = get_client_ssl_context(
+        ca_file=settings.tls_ca_file,
+        certificate=settings.tls_certificate_file,
+        keyfile=settings.tls_key_file,
+        password=settings.tls_password,
+    )
+
+    try:
+        async with open_websocket_url(url, ssl_context=ssl_context, **arguments) as ws:
+            yield ws
+    except ConnectionTimeout:
+        console.print(f'[error]Unable to connect to {url}')
+        raise SystemExit(1)
+    except DisconnectionTimeout:
+        console.print(f'[error]Unable to disconnect on time from {url}')
+        raise SystemExit(1)
+    except ConnectionRejected as e:
+        console.print(f'[error]Connection was rejected by {url}')
+        console.print(f'[label]status code[/] = [info]{e.status_code}[/]')
+        headers = [(key.decode(), value.decode()) for key, value in e.headers] if e.headers is not None else []
+        console.print(f'[label]headers[/] = {headers}')
+        console.print(f'[label]body[/] = [info]{e.body.decode()}[/]')
+
         raise SystemExit(1)
 
 
