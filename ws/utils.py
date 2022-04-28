@@ -6,6 +6,7 @@ import ssl
 from typing import Any, AsyncIterator, Callable, Optional, TypeVar
 
 import anyio
+import certifi
 import pydantic
 import trio
 from trio_websocket import (
@@ -66,6 +67,7 @@ async def reverse_read_lines(file: str) -> AsyncIterator[bytes]:
 def get_client_ssl_context(
     ca_file: str = None, certificate: str = None, keyfile: str = None, password: str = None
 ) -> Optional[ssl.SSLContext]:
+    context = None
     if ca_file:
         try:
             # noinspection PyTypeChecker
@@ -73,16 +75,19 @@ def get_client_ssl_context(
         except ssl.SSLError:
             console.print(f'[error]Unable to load certificate(s) located in the (tls_ca_file) file {ca_file}')
             raise SystemExit(1)
-        return context
 
+    # TODO: If someone one day is unhappy by the fact that I load a CA bundle certificate from certifi
+    #  It is a good idea to look httpx default context implementation. It creates a context that can work
+    #  for both verified and unverified connections
     if certificate:
+        if context is None:
+            # noinspection PyTypeChecker
+            context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=certifi.where())
         additional_arguments = {}
         if keyfile:
             additional_arguments['keyfile'] = keyfile
         if password:
             additional_arguments['password'] = password
-        # noinspection PyTypeChecker
-        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
         try:
             context.load_cert_chain(certificate, **additional_arguments)
         except ssl.SSLError:
@@ -101,6 +106,8 @@ def get_client_ssl_context(
     if password:
         console.print('[error]You provided tls_password without tls_key_file and tls_certificate_file')
         raise SystemExit(1)
+
+    return context
 
 
 @contextlib.asynccontextmanager
