@@ -16,6 +16,7 @@ from ws.utils import (
     get_client_ssl_context,
     reverse_read_lines,
     signal_handler,
+    sleep_until,
     websocket_client,
 )
 
@@ -262,3 +263,17 @@ class TestCatchPydanticError:
             nursery.start_soon(main)
 
         assert 'not a valid float' not in capsys.readouterr().out
+
+
+class TestSleepUntil:
+    """Tests function sleep_until"""
+
+    async def test_should_call_sleep_forever_when_duration_is_none(self, nursery, mocker):
+        sleep_mock = mocker.patch('trio.sleep_forever', new=mock.AsyncMock())
+        await sleep_until(nursery.cancel_scope, None)
+
+        sleep_mock.assert_awaited_once()
+
+    async def test_should_call_sleep_with_given_duration_then_cancels_nursery(self):
+        async with trio.open_nursery() as nursery:
+            await sleep_until(nursery.cancel_scope, 0.01)

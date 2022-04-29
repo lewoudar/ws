@@ -151,6 +151,14 @@ async def websocket_client(url: str) -> WebSocketConnection:
         raise SystemExit(1)
 
 
+async def sleep_until(cancel_scope: trio.CancelScope, duration: float = None) -> None:
+    if duration is None:
+        await trio.sleep_forever()
+    else:
+        await trio.sleep(duration)
+        cancel_scope.cancel()
+
+
 # Create a generic type helps to preserve type annotations done by static analyzing tools
 FuncCallable = TypeVar('FuncCallable', bound=Callable)
 
