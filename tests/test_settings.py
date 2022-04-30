@@ -15,6 +15,7 @@ def test_should_check_default_setting_values():
     assert settings.max_message_size == 1024 * 1024
     assert settings.message_queue_size == 1
     assert settings.receive_buffer == 4 * 1024
+    assert settings.svg_width == 150
     assert settings.extra_headers is None
     assert settings.tls_ca_file is None
     assert settings.tls_certificate_file is None

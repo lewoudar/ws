@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     max_message_size: int = Field(1024 * 1024, gt=0)
     receive_buffer: int = Field(4 * 1024, gt=0)
     extra_headers: Optional[Dict[str, str]] = None
+    # 150 seems like a good default for the terminal width for SVG output, at least on my Lenovo laptop
+    # where I made some tests
+    svg_width: int = Field(150, gt=0)
     tls_ca_file: Optional[FilePath] = None
     tls_certificate_file: Optional[FilePath] = None
     tls_key_file: Optional[FilePath] = None
