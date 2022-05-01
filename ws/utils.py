@@ -1,6 +1,7 @@
 """Some utility functions for commands"""
 import contextlib
 import io
+import pathlib
 import signal
 import ssl
 from typing import Any, AsyncIterator, Callable, Optional, TypeVar
@@ -9,6 +10,7 @@ import anyio
 import certifi
 import pydantic
 import trio
+from rich.console import Console
 from trio_websocket import (
     ConnectionRejected,
     ConnectionTimeout,
@@ -18,7 +20,10 @@ from trio_websocket import (
 )
 
 from ws.console import console
-from ws.settings import get_settings
+from ws.settings import Settings, get_settings
+
+# Create a generic type helps to preserve type annotations done by static analyzing tools
+FuncCallable = TypeVar('FuncCallable', bound=Callable)
 
 
 async def signal_handler(scope: anyio.CancelScope) -> None:
@@ -159,8 +164,21 @@ async def sleep_until(cancel_scope: trio.CancelScope, duration: float = None) ->
         cancel_scope.cancel()
 
 
-# Create a generic type helps to preserve type annotations done by static analyzing tools
-FuncCallable = TypeVar('FuncCallable', bound=Callable)
+def configure_console_recording(terminal: Console, settings: Settings, filename: str = None) -> None:
+    if filename is not None:
+        terminal.record = True
+        if filename.endswith('.svg'):
+            terminal.width = settings.svg_width
+
+
+def save_output(terminal: Console, filename: str) -> None:
+    file_path = pathlib.Path(filename)
+    if file_path.suffix == '.html':
+        terminal.save_html(filename)
+    elif file_path.suffix == '.svg':
+        terminal.save_svg(filename, title=file_path.name)
+    else:
+        terminal.save_text(filename)
 
 
 def catch_too_slow_error(func: FuncCallable) -> FuncCallable:
