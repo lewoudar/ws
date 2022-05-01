@@ -80,9 +80,9 @@ async def test_should_read_incoming_messages_with_json_flag(nursery, capsys):
     # sometimes I have 9 messages, other times 10, probably due to the behaviour of move_on_after or the system
     # clock
     output = capsys.readouterr().out
-    assert 9 <= output.count('─ TEXT message at') <= 10
-    assert 9 <= output.count('─ BINARY message at') <= 10
-    assert 18 <= output.count('{\n  "hello": "world"\n}\n') <= 20
+    assert output.count('─ TEXT message at') in (9, 10)
+    assert output.count('─ BINARY message at') in (9, 10)
+    assert output.count('{\n  "hello": "world"\n}\n') in (18, 20)
 
 
 async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
@@ -91,10 +91,39 @@ async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
         await main('ws://localhost:1234', False)
 
     output = capsys.readouterr().out
-    assert 9 <= output.count('─ TEXT message at') <= 10
-    assert 9 <= output.count('{"hello": "world"}\n') <= 10
-    assert 9 <= output.count('─ BINARY message at') <= 10
-    assert 9 <= output.count('b\'{"hello": "world"}\'\n') <= 10
+    assert output.count('─ TEXT message at') in (9, 10)
+    assert output.count('{"hello": "world"}\n') in (9, 10)
+    assert output.count('─ BINARY message at') in (9, 10)
+    assert output.count('b\'{"hello": "world"}\'\n') in (9, 10)
+
+
+async def test_should_read_messages_for_a_given_amount_of_time(nursery, capsys):
+    await nursery.start(serve_websocket, handler, 'localhost', 1234, None)
+    await main('ws://localhost:1234', False, duration=0.5)
+
+    output = capsys.readouterr().out
+    assert output.count('─ TEXT message at') in (4, 5)
+    assert output.count('{"hello": "world"}\n') in (4, 5)
+    assert output.count('─ BINARY message at') in (4, 5)
+    assert output.count('b\'{"hello": "world"}\'\n') in (4, 5)
+
+
+@pytest.mark.parametrize('filename', ['file.txt', 'file.html', 'file.svg'])
+@pytest.mark.usefixtures('reset_console')
+async def test_should_read_messages_and_save_them_in_a_file(tmp_path, nursery, capsys, filename):
+    file_path = tmp_path / filename
+    await nursery.start(serve_websocket, handler, 'localhost', 1234, None)
+    await main('ws://localhost:1234', False, duration=0.5, filename=f'{file_path}')
+
+    terminal_output = capsys.readouterr().out
+    assert terminal_output.count('─ TEXT message at') in (4, 5)
+    assert file_path.exists()
+
+    file_output = file_path.read_text()
+    assert file_output.count('TEXT message at') in (4, 5)
+    assert 4 <= file_output.count('BINARY message at') in (4, 5)
+    assert file_output.count('hello') in (8, 10)
+    assert file_output.count('world') in (8, 10)
 
 
 def test_should_check_trio_run_is_correctly_called_without_options(runner, mocker):
@@ -102,13 +131,19 @@ def test_should_check_trio_run_is_correctly_called_without_options(runner, mocke
     result = runner.invoke(cli, ['listen', 'ws://localhost:1234'])
 
     assert result.exit_code == 0
-    run_mock.assert_called_once_with(main, 'ws://localhost:1234', False)
+    run_mock.assert_called_once_with(main, 'ws://localhost:1234', False, None, None)
 
 
-@pytest.mark.parametrize('json_option', ['-j', '--json'])
-def test_should_check_trio_run_is_correctly_called_with_options(runner, mocker, json_option):
+@pytest.mark.parametrize(
+    ('json_option', 'duration_option', 'filename_option'), [('-j', '-d', '-f'), ('--json', '--duration', '--file')]
+)
+def test_should_check_trio_run_is_correctly_called_with_options(
+    runner, mocker, json_option, duration_option, filename_option
+):
     run_mock = mocker.patch('trio.run')
-    result = runner.invoke(cli, ['listen', 'ws://localhost:1234', json_option])
+    result = runner.invoke(
+        cli, ['listen', 'ws://localhost:1234', json_option, duration_option, '2', filename_option, 'record.txt']
+    )
 
     assert result.exit_code == 0
-    run_mock.assert_called_once_with(main, 'ws://localhost:1234', True)
+    run_mock.assert_called_once_with(main, 'ws://localhost:1234', True, 2.0, 'record.txt')

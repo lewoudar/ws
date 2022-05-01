@@ -9,7 +9,7 @@ import trustme
 from click.testing import CliRunner
 from rich.console import Console
 
-from ws.console import custom_theme
+from ws.console import console, custom_theme
 
 
 @pytest.fixture()
@@ -88,3 +88,12 @@ def private_key(tmp_path, server_cert) -> pathlib.Path:
 def test_console():
     """A console designed for tests."""
     return Console(theme=custom_theme, file=io.StringIO())
+
+
+@pytest.fixture()
+def reset_console():
+    """Fixture useful in tests where we changed some console attributes."""
+    width = console.width
+    yield
+    console.record = False
+    console.width = width

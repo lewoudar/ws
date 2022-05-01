@@ -52,3 +52,20 @@ def interval_option(message: str) -> Callable:
         show_default=True,
         help=message,
     )
+
+
+duration_option = click.option(
+    '-d', '--duration', type=click.FloatRange(min=0, min_open=True), help='Time to run the program in seconds.'
+)
+
+filename_option = click.option(
+    '-f',
+    '--file',
+    'filename',
+    type=click.Path(dir_okay=False, writable=True),
+    help=(
+        'File to store the output. The file extension determines the type of file will be created. '
+        'A file ending with ".html" will be an html file, a file ending with ".svg" will be an SVG file and other '
+        'extensions will be considered as text files.'
+    ),
+)
