@@ -72,6 +72,27 @@ def test_should_print_error_when_url_argument_is_not_given(runner):
     assert "Missing argument 'URL'" in result.output
 
 
+def test_should_print_error_when_duration_is_not_a_float(runner):
+    result = runner.invoke(cli, ['listen', 'ws://localhost:1234', '-d', 'foo'])
+
+    assert result.exit_code == 2
+    assert 'not a valid float range' in result.output
+
+
+def test_should_print_error_when_duration_is_not_in_the_valid_range(runner):
+    result = runner.invoke(cli, ['listen', 'ws://localhost:1234', '-d', '0'])
+
+    assert result.exit_code == 2
+    assert 'is not in the range x>0' in result.output
+
+
+def test_should_print_error_when_filename_is_not_a_file(tmp_path, runner):
+    result = runner.invoke(cli, ['listen', 'ws://localhost:1234', '-f', f'{tmp_path}'])
+
+    assert result.exit_code == 2
+    assert 'is a directory' in result.output
+
+
 async def test_should_read_incoming_messages_with_json_flag(nursery, capsys):
     await nursery.start(serve_websocket, handler, 'localhost', 1234, None)
     with trio.move_on_after(1):
@@ -82,7 +103,7 @@ async def test_should_read_incoming_messages_with_json_flag(nursery, capsys):
     output = capsys.readouterr().out
     assert output.count('─ TEXT message at') in (9, 10)
     assert output.count('─ BINARY message at') in (9, 10)
-    assert output.count('{\n  "hello": "world"\n}\n') in (18, 20)
+    assert output.count('{\n  "hello": "world"\n}\n') in (18, 19, 20)
 
 
 async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
@@ -122,8 +143,8 @@ async def test_should_read_messages_and_save_them_in_a_file(tmp_path, nursery, c
     file_output = file_path.read_text()
     assert file_output.count('TEXT message at') in (4, 5)
     assert 4 <= file_output.count('BINARY message at') in (4, 5)
-    assert file_output.count('hello') in (8, 10)
-    assert file_output.count('world') in (8, 10)
+    assert file_output.count('hello') in (8, 9, 10)
+    assert file_output.count('world') in (8, 9, 10)
 
 
 def test_should_check_trio_run_is_correctly_called_without_options(runner, mocker):
