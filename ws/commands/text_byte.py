@@ -3,9 +3,10 @@ from typing import AnyStr
 import click
 import trio
 
+from ws.client import websocket_client
 from ws.options import url_argument
 from ws.parameters import ByteParamType, TextParamType
-from ws.utils import function_runner, signal_handler, websocket_client
+from ws.utils.io import function_runner, signal_handler
 
 
 async def send_message(url: str, message: AnyStr) -> None:

@@ -1,7 +1,8 @@
 import click
 import trio
 
-from ws.console import console
+from ws.client import websocket_client
+from ws.console import configure_console_recording, console, save_output
 from ws.options import (
     duration_option,
     filename_option,
@@ -12,16 +13,8 @@ from ws.options import (
     validate_number,
 )
 from ws.settings import get_settings
-from ws.utils import (
-    catch_pydantic_error,
-    catch_too_slow_error,
-    configure_console_recording,
-    function_runner,
-    save_output,
-    signal_handler,
-    sleep_until,
-    websocket_client,
-)
+from ws.utils.decorators import catch_pydantic_error, catch_too_slow_error
+from ws.utils.io import function_runner, signal_handler, sleep_until
 
 
 @catch_too_slow_error

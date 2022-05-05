@@ -7,7 +7,7 @@ from trio_websocket import ConnectionClosed, WebSocketRequest, serve_websocket
 from ws.console import console
 from ws.parameters import HOST
 from ws.settings import get_settings
-from ws.utils import function_runner, signal_handler
+from ws.utils.io import function_runner, signal_handler
 
 SETTINGS = get_settings()
 

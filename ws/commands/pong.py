@@ -1,7 +1,8 @@
 import click
 import trio
 
-from ws.console import console
+from ws.client import websocket_client
+from ws.console import configure_console_recording, console, save_output
 from ws.options import (
     duration_option,
     filename_option,
@@ -12,14 +13,7 @@ from ws.options import (
     validate_number,
 )
 from ws.settings import get_settings
-from ws.utils import (
-    configure_console_recording,
-    function_runner,
-    save_output,
-    signal_handler,
-    sleep_until,
-    websocket_client,
-)
+from ws.utils.io import function_runner, signal_handler, sleep_until
 
 
 async def make_pong(url: str, number: int, interval: float, message: bytes = None, filename: str = None) -> None:

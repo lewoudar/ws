@@ -6,7 +6,7 @@ import anyio
 import click
 import trio
 
-from ws.utils import function_runner, reverse_read_lines, signal_handler
+from ws.utils.io import function_runner, reverse_read_lines, signal_handler
 
 
 async def tail_file(filename: str, lines_count: int, follow: bool) -> None:

@@ -7,17 +7,11 @@ import trio
 from rich.console import Console
 from rich.markup import escape
 
-from ws.console import console
+from ws.client import websocket_client
+from ws.console import configure_console_recording, console, save_output
 from ws.options import duration_option, filename_option, url_argument
 from ws.settings import get_settings
-from ws.utils import (
-    configure_console_recording,
-    function_runner,
-    save_output,
-    signal_handler,
-    sleep_until,
-    websocket_client,
-)
+from ws.utils.io import function_runner, signal_handler, sleep_until
 
 
 def trace_rule(terminal: Console, is_bytes: bool) -> None:
