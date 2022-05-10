@@ -7,7 +7,7 @@ import pytest
 from ws.settings import ENV_FILE, Settings, get_config_from_toml, get_settings
 
 
-def test_should_check_default_setting_values():
+def test_should_check_default_setting_values(test_console):
     settings = Settings()
     assert settings.connect_timeout == 5.0
     assert settings.disconnect_timeout == 5.0
@@ -15,7 +15,7 @@ def test_should_check_default_setting_values():
     assert settings.max_message_size == 1024 * 1024
     assert settings.message_queue_size == 1
     assert settings.receive_buffer == 4 * 1024
-    assert settings.svg_width == 150
+    assert settings.terminal_width == test_console.width
     assert settings.extra_headers is None
     assert settings.tls_ca_file is None
     assert settings.tls_certificate_file is None

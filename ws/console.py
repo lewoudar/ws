@@ -21,8 +21,7 @@ console = Console(theme=custom_theme)
 def configure_console_recording(terminal: Console, settings: Settings, filename: str = None) -> None:
     if filename is not None:
         terminal.record = True
-        if filename.endswith('.svg'):
-            terminal.width = settings.svg_width
+    terminal.width = settings.terminal_width
 
 
 def save_output(terminal: Console, filename: str) -> None:

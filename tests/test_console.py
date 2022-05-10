@@ -14,20 +14,11 @@ class TestConfigureConsoleRecording:
         configure_console_recording(console, settings, filename)
 
         assert console.record is record
-        assert console.width != settings.svg_width
+        assert console.width == settings.terminal_width
 
-    def test_should_correctly_configure_terminal_width_and_record_properties_given_correct_input(self):
-        filename = 'foo.svg'
-        console = Console()
-        settings = get_settings()
-        configure_console_recording(console, settings, filename)
-
-        assert console.record is True
-        assert console.width == settings.svg_width
-
-    def test_should_check_svg_width_is_taken_from_environnement_variable(self, monkeypatch):
-        monkeypatch.setenv('WS_SVG_WIDTH', '120')
-        filename = 'foo.svg'
+    @pytest.mark.parametrize('filename', ['foo.txt', 'foo.html', 'foo.svg'])
+    def test_should_check_width_is_taken_from_environnement_variable(self, monkeypatch, filename):
+        monkeypatch.setenv('WS_TERMINAL_WIDTH', '120')
         console = Console()
         settings = get_settings()
         configure_console_recording(console, settings, filename)
