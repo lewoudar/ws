@@ -5,6 +5,7 @@ from .commands.echo_server import echo_server
 from .commands.listen import listen
 from .commands.ping import ping
 from .commands.pong import pong
+from .commands.session import session
 from .commands.tail import tail
 from .commands.text_byte import byte, text
 
@@ -19,5 +20,5 @@ def cli():
     """
 
 
-for command in [tail, ping, pong, echo_server, listen, byte, text]:
+for command in [tail, ping, pong, echo_server, listen, byte, text, session]:
     cli.add_command(command)
