@@ -28,7 +28,7 @@ async def test_should_print_general_help_and_exit_program(capsys, mocker, nurser
     ('input_data', 'message'),
     [('help ping bar', 'Unknown argument: bar\n'), ('help ping foo bar', 'Unknown arguments: foo bar\n')],
 )
-async def test_should_print_message_unknown_arguments_when_they_are_passed_to_help_sub_command(
+async def test_should_print_unknown_arguments_when_they_are_passed_to_help_sub_command(
     capsys, mocker, nursery, input_data, message
 ):
     mocker.patch('ws.console.console.input', get_fake_input(input_data))
@@ -37,6 +37,7 @@ async def test_should_print_message_unknown_arguments_when_they_are_passed_to_he
     output = capsys.readouterr().out
 
     assert message in output
+    assert 'Bye!' in output
 
 
 async def test_should_print_list_of_commands_when_unknown_command_is_passed_as_argument(capsys, mocker, nursery):

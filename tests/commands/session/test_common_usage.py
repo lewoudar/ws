@@ -35,6 +35,28 @@ async def test_should_exit_program_when_user_makes_a_ctrl_d(capsys, mocker, nurs
     assert 'Bye! 👋\n' in output
 
 
+async def test_should_continue_prompting_user_if_input_is_empty(capsys, mocker, nursery):
+    count = 0
+
+    def fake_input(_prompt):
+        nonlocal count
+        if count == 0:
+            count += 1
+            return ''
+        elif count == 1:
+            count += 1
+            return '  '
+        else:
+            return 'quit'
+
+    mocker.patch('ws.console.console.input', fake_input)
+    await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
+    await main('ws://localhost:1234')
+    output = capsys.readouterr().out
+
+    assert 'Bye! 👋\n' in output
+
+
 @pytest.mark.parametrize('filename', ['file.txt', 'file.html', 'file.svg'])
 @pytest.mark.usefixtures('reset_console')
 async def test_should_print_input_and_save_it_in_a_file(capsys, tmp_path, mocker, nursery, filename):

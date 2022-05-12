@@ -22,9 +22,9 @@ from ws.utils.io import function_runner, signal_handler, sleep_until
 async def make_ping(url: str, number: int, interval: float, message: bytes = None, filename: str = None) -> None:
     settings = get_settings()
     configure_console_recording(console, settings, filename)
-    # trio_websockets by default sends 32 bytes if no payload is given
+    # trio_websocket by default sends 32 bytes if no payload is given
     payload_length = len(message) if message is not None else 32
-    console.print(f'PING [info]{url}[/] with [info]{payload_length}[/] bytes of data')
+    console.print(f'PING {url} with {payload_length} bytes of data')
     counter = 0
     async with websocket_client(url) as client:
         while True:
@@ -33,7 +33,7 @@ async def make_ping(url: str, number: int, interval: float, message: bytes = Non
             with trio.fail_after(settings.response_timeout):
                 await client.ping(message)
                 duration = trio.current_time() - beginning
-                console.print(f'[label]sequence[/]=[info]{counter}[/], [label]time[/]=[info]{duration:.2f}[/]s')
+                console.print(f'[label]sequence[/]=[number]{counter}[/], [label]time[/]=[number]{duration:.2f}[/]s')
 
             if 0 < number <= counter:
                 break

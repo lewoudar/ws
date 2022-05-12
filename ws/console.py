@@ -11,6 +11,7 @@ data = {
     'warning': Style(color='yellow'),
     'label': Style(color='yellow'),
     'info': Style(color='blue'),
+    'number': Style(color='cyan', bold=True),
     'prompt': Style(color='bright_cyan'),
 }
 custom_theme = Theme(data)
