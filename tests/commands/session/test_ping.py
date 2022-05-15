@@ -9,7 +9,7 @@ from ws.commands.session import main
     ('input_data', 'message'),
     [('ping foo bar', 'Unknown argument: bar\n'), ('ping foo bar tar', 'Unknown arguments: bar tar\n')],
 )
-async def test_should_print_unknown_arguments_when_they_are_passed_to_help_sub_command(
+async def test_should_print_unknown_arguments_when_they_are_passed_to_ping_sub_command(
     capsys, mocker, nursery, input_data, message
 ):
     mocker.patch('ws.console.console.input', get_fake_input(input_data))

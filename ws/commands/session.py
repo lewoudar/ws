@@ -5,7 +5,7 @@ from ws.client import websocket_client
 from ws.console import configure_console_recording, console, save_output
 from ws.options import filename_option, url_argument
 from ws.settings import get_settings
-from ws.utils.command import Command, handle_help_command, handle_ping_command, parse_command
+from ws.utils.command import Command, handle_help_command, handle_ping_command, handle_pong_command, parse_command
 from ws.utils.decorators import catch_pydantic_error
 from ws.utils.documentation import INTRODUCTION
 from ws.utils.io import function_runner, signal_handler
@@ -35,6 +35,8 @@ async def interact(url: str, filename: str = None) -> None:
                     handle_help_command(command.args, console)
                 elif command.name == Command.PING.value:
                     await handle_ping_command(url, command.args, console, client, settings)
+                elif command.name == Command.PONG.value:
+                    await handle_pong_command(url, command.args, console, client)
             except EOFError:
                 console.print(good_bye_message)
                 break

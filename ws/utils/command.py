@@ -19,6 +19,16 @@ class CommandHelper:
     args: List[str]
 
 
+class CustomConfig:
+    arbitrary_types_allowed = True
+
+
+@dataclass(frozen=True, config=CustomConfig)
+class NamespaceData:
+    obj: argparse.Namespace
+    unknown_arguments: List[str]
+
+
 class Command(str, enum.Enum):
     QUIT = 'quit'
     CLOSE = 'close'
@@ -43,21 +53,25 @@ def handle_unknown_arguments(unknown_arguments: List[str], terminal: Console) ->
     terminal.print(f'Unknown argument{plural_form(unknown_arguments)}: [warning]{arguments}[/]')
 
 
-def handle_help_command(arguments: List[str], terminal: Console) -> None:
+def get_namespace_data(arguments: List[str], argument: str, nargs: str = '1') -> NamespaceData:
     parser = argparse.ArgumentParser()
-    parser.add_argument('command', nargs='?')
-    obj, unknown_arguments = parser.parse_known_args(arguments)
-    if unknown_arguments:
-        handle_unknown_arguments(unknown_arguments, terminal)
+    parser.add_argument(argument, nargs=nargs)
+    return NamespaceData(*parser.parse_known_args(arguments))
+
+
+def handle_help_command(arguments: List[str], terminal: Console) -> None:
+    namespace_data = get_namespace_data(arguments, 'command', nargs='?')
+    if namespace_data.unknown_arguments:
+        handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
         return
 
-    if obj.command is None:
+    if namespace_data.obj.command is None:
         terminal.print(HELP)
         return
 
     commands = [command.value for command in Command if command.value != 'help']
-    if obj.command not in commands:
-        terminal.print(f'Unknown command [error]{obj.command}[/], available commands are:')
+    if namespace_data.obj.command not in commands:
+        terminal.print(f'Unknown command [error]{namespace_data.obj.command}[/], available commands are:')
         for command in commands:
             terminal.print(f'• [info]{command}')
         return
@@ -72,7 +86,7 @@ def handle_help_command(arguments: List[str], terminal: Console) -> None:
     }
 
     for key, value in help_messages.items():
-        if key == obj.command:
+        if key == namespace_data.obj.command:
             terminal.print(Markdown(value))
             return
 
@@ -80,19 +94,17 @@ def handle_help_command(arguments: List[str], terminal: Console) -> None:
 async def handle_ping_command(
     url: str, arguments: List[str], terminal: Console, client: WebSocketConnection, settings: Settings
 ) -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument('message', nargs='?')
-    obj, unknown_arguments = parser.parse_known_args(arguments)
-    if unknown_arguments:
-        handle_unknown_arguments(unknown_arguments, terminal)
+    namespace_data = get_namespace_data(arguments, 'message', nargs='?')
+    if namespace_data.unknown_arguments:
+        handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
         return
 
     # trio_websocket by default sends 32 bytes if no payload is given
-    if obj.message is None:
+    if namespace_data.obj.message is None:
         payload_length = 32
         message = None
     else:
-        message = obj.message.encode()
+        message = namespace_data.obj.message.encode()
         payload_length = len(message)
 
     plural = 's' if payload_length > 1 else ''
@@ -110,3 +122,25 @@ async def handle_ping_command(
         )
     else:
         terminal.print(f'Took [number]{duration:.2f}[/]s to receive a PONG.\n')
+
+
+async def handle_pong_command(url: str, arguments: List[str], terminal: Console, client: WebSocketConnection) -> None:
+    namespace_data = get_namespace_data(arguments, 'message', nargs='?')
+    if namespace_data.unknown_arguments:
+        handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
+        return
+
+    if namespace_data.obj.message is None:
+        message = b''
+        payload_length = 0
+    else:
+        message = namespace_data.obj.message.encode()
+        payload_length = len(message)
+
+    plural = 's' if payload_length > 1 else ''
+    terminal.print(f'PONG {url} with {payload_length} byte{plural} of data')
+
+    before = trio.current_time()
+    await client.pong(message)
+    duration = trio.current_time() - before
+    terminal.print(f'Took [number]{duration:.2f}[/]s to send the PONG.\n')
