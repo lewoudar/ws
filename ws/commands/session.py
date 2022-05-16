@@ -7,6 +7,7 @@ from ws.options import filename_option, url_argument
 from ws.settings import get_settings
 from ws.utils.command import (
     Command,
+    handle_close,
     handle_data_command,
     handle_help_command,
     handle_ping_command,
@@ -39,6 +40,11 @@ async def interact(url: str, filename: str = None) -> None:
                 if command.name == Command.QUIT.value:
                     console.print(good_bye_message)
                     break
+                elif command.name == Command.CLOSE.value:
+                    ok = await handle_close(command.args, console, client)
+                    if ok:
+                        console.print(good_bye_message)
+                        break
                 elif command.name == Command.HELP.value:
                     handle_help_command(command.args, console)
                 elif command.name == Command.PING.value:

@@ -173,3 +173,32 @@ async def handle_data_command(
 
     await client.send_message(message)
     terminal.print('Sent data over the wire.\n')
+
+
+async def handle_close(arguments: List[str], terminal: Console, client: WebSocketConnection) -> bool:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('code', default='1000')
+    parser.add_argument('reason', nargs='?')
+    obj, unknown_arguments = parser.parse_known_args(arguments)
+    if unknown_arguments:
+        handle_unknown_arguments(unknown_arguments, terminal)
+        return False
+
+    try:
+        code = int(obj.code)
+    except ValueError:
+        terminal.print(f'[error]code "{obj.code}" is not an integer.\n')
+        return False
+
+    if not 0 <= code < 5000:
+        terminal.print(f'[error]code {code} is not in the range [0, 4999].\n')
+        return False
+
+    if obj.reason is not None and len(obj.reason) > 123:
+        terminal.print(
+            f'[error]reason must not exceed a length of 123 bytes but you provided {len(obj.reason)} bytes.\n'
+        )
+        return False
+
+    await client.aclose(code, obj.reason)  # type: ignore
+    return True
