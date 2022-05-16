@@ -35,6 +35,18 @@ async def test_should_print_timeout_message_and_exit_program(capsys, monkeypatch
     assert 'Bye!' in output
 
 
+async def test_should_print_error_message_when_payload_length_exceeds_125(capsys, mocker, nursery):
+    payload = 'a' * 126
+    mocker.patch('ws.console.console.input', get_fake_input(f'ping {payload}'))
+    await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
+    await main('ws://localhost:1234')
+    output = capsys.readouterr().out
+
+    assert 'The message of a PING must not exceed a length of 125 bytes but you provided' in output
+    assert '126' in output
+    assert 'Bye!' in output
+
+
 @pytest.mark.parametrize(
     ('input_data', 'length'), [('ping', 32), ('ping "hello world"', 11), ("ping 'hello world'", 11)]
 )

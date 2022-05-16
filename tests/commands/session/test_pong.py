@@ -21,6 +21,18 @@ async def test_should_print_unknown_arguments_when_they_are_passed_to_pong_sub_c
     assert 'Bye!' in output
 
 
+async def test_should_print_error_message_when_payload_length_exceeds_125(capsys, mocker, nursery):
+    payload = 'a' * 126
+    mocker.patch('ws.console.console.input', get_fake_input(f'pong {payload}'))
+    await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
+    await main('ws://localhost:1234')
+    output = capsys.readouterr().out
+
+    assert 'The message of a PONG must not exceed a length of 125 bytes but you provided' in output
+    assert '126' in output
+    assert 'Bye!' in output
+
+
 @pytest.mark.parametrize(
     ('input_data', 'length'), [('pong', 0), ('pong "hello world"', 11), ("pong 'hello world'", 11)]
 )

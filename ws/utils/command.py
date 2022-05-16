@@ -114,6 +114,13 @@ async def handle_ping_command(
         message = namespace_data.obj.message.encode()
         payload_length = len(message)
 
+    if payload_length > 125:
+        terminal.print(
+            '[error]The message of a PING must not exceed a length'
+            f' of [number]125[/] bytes but you provided [number]{payload_length}[/] bytes.\n'
+        )
+        return
+
     plural = 's' if payload_length > 1 else ''
     terminal.print(f'PING {url} with {payload_length} byte{plural} of data')
 
@@ -143,6 +150,13 @@ async def handle_pong_command(url: str, arguments: List[str], terminal: Console,
     else:
         message = namespace_data.obj.message.encode()
         payload_length = len(message)
+
+    if payload_length > 125:
+        terminal.print(
+            '[error]The message of a PONG must not exceed a length'
+            f' of [number]125[/] bytes but you provided [number]{payload_length}[/] bytes.\n'
+        )
+        return
 
     plural = 's' if payload_length > 1 else ''
     terminal.print(f'PONG {url} with {payload_length} byte{plural} of data')
@@ -196,7 +210,8 @@ async def handle_close(arguments: List[str], terminal: Console, client: WebSocke
 
     if obj.reason is not None and len(obj.reason) > 123:
         terminal.print(
-            f'[error]reason must not exceed a length of 123 bytes but you provided {len(obj.reason)} bytes.\n'
+            '[error]reason must not exceed a length of [number]123[/]'
+            f' bytes but you provided [number]{len(obj.reason)}[/] bytes.\n'
         )
         return False
 
