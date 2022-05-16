@@ -2,6 +2,7 @@ import argparse
 import enum
 from typing import List, Sequence
 
+import click
 import trio
 from click.parser import split_arg_string
 from pydantic.dataclasses import dataclass
@@ -9,6 +10,7 @@ from rich.console import Console
 from rich.markdown import Markdown
 from trio_websocket import WebSocketConnection
 
+from ws.parameters import get_normalized_message
 from ws.settings import Settings
 from ws.utils.documentation import BYTE_HELP, CLOSE_HELP, HELP, PING_HELP, PONG_HELP, QUIT_HELP, TEXT_HELP
 
@@ -53,10 +55,20 @@ def handle_unknown_arguments(unknown_arguments: List[str], terminal: Console) ->
     terminal.print(f'Unknown argument{plural_form(unknown_arguments)}: [warning]{arguments}[/]')
 
 
-def get_namespace_data(arguments: List[str], argument: str, nargs: str = '1') -> NamespaceData:
+def get_namespace_data(arguments: List[str], argument: str, nargs: str = None) -> NamespaceData:
     parser = argparse.ArgumentParser()
-    parser.add_argument(argument, nargs=nargs)
+    if nargs is None:
+        parser.add_argument(argument)
+    else:
+        parser.add_argument(argument, nargs=nargs)
     return NamespaceData(*parser.parse_known_args(arguments))
+
+
+def print_unknown_command_message(unknown_command: str, commands: List[str], terminal: Console) -> None:
+    terminal.print(f'Unknown command [error]{unknown_command}[/], available commands are:')
+    for command in commands:
+        terminal.print(f'• [info]{command}')
+    terminal.print()
 
 
 def handle_help_command(arguments: List[str], terminal: Console) -> None:
@@ -71,9 +83,7 @@ def handle_help_command(arguments: List[str], terminal: Console) -> None:
 
     commands = [command.value for command in Command if command.value != 'help']
     if namespace_data.obj.command not in commands:
-        terminal.print(f'Unknown command [error]{namespace_data.obj.command}[/], available commands are:')
-        for command in commands:
-            terminal.print(f'• [info]{command}')
+        print_unknown_command_message(namespace_data.obj.command, commands, terminal)
         return
 
     help_messages = {
@@ -144,3 +154,25 @@ async def handle_pong_command(url: str, arguments: List[str], terminal: Console,
     await client.pong(message)
     duration = trio.current_time() - before
     terminal.print(f'Took [number]{duration:.2f}[/]s to send the PONG.\n')
+
+
+async def handle_data_command(
+    arguments: List[str], terminal: Console, client: WebSocketConnection, is_byte: bool = False
+) -> None:
+    namespace_data = get_namespace_data(arguments, 'message', nargs='?')
+    if namespace_data.unknown_arguments:
+        handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
+        return
+
+    if namespace_data.obj.message is None:
+        terminal.print('[error]The message is mandatory.\n')
+        return
+
+    try:
+        message = get_normalized_message(namespace_data.obj.message, is_bytes=is_byte)
+    except click.BadParameter as e:
+        terminal.print(f'[error]{e.message}\n')
+        return
+
+    await client.send_message(message)
+    terminal.print('Sent data over the wire.\n')

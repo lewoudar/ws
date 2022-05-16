@@ -4,6 +4,7 @@ from trio_websocket import serve_websocket
 from tests.helpers import get_fake_input, server_handler
 from ws.commands.session import main
 from ws.main import cli
+from ws.utils.command import Command
 
 
 def test_should_print_error_when_url_is_not_given(runner):
@@ -33,6 +34,18 @@ async def test_should_exit_program_when_user_makes_a_ctrl_d(capsys, mocker, nurs
     assert 'To know more about a particular command type help <command>.\n' in output
     assert 'To close the session, you can type Ctrl+D or the quit command.\n' in output
     assert 'Bye! 👋\n' in output
+
+
+async def test_should_print_error_message_when_an_unknown_command_is_given_as_input(capsys, mocker, nursery):
+    mocker.patch('ws.console.console.input', get_fake_input('foo'))
+    await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
+    await main('ws://localhost:1234')
+    output = capsys.readouterr().out
+
+    assert 'Unknown command foo, available commands are:\n' in output
+    for command in Command:
+        assert f'• {command.value}\n' in output
+    assert 'Bye!' in output
 
 
 async def test_should_continue_prompting_user_if_input_is_empty(capsys, mocker, nursery):
