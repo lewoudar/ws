@@ -55,12 +55,9 @@ def handle_unknown_arguments(unknown_arguments: List[str], terminal: Console) ->
     terminal.print(f'Unknown argument{plural_form(unknown_arguments)}: [warning]{arguments}[/]')
 
 
-def get_namespace_data(arguments: List[str], argument: str, nargs: str = None) -> NamespaceData:
+def get_namespace_data(arguments: List[str], argument: str, nargs: str = '?') -> NamespaceData:
     parser = argparse.ArgumentParser()
-    if nargs is None:
-        parser.add_argument(argument)
-    else:
-        parser.add_argument(argument, nargs=nargs)
+    parser.add_argument(argument, nargs=nargs)
     return NamespaceData(*parser.parse_known_args(arguments))
 
 
@@ -72,7 +69,7 @@ def print_unknown_command_message(unknown_command: str, commands: List[str], ter
 
 
 def handle_help_command(arguments: List[str], terminal: Console) -> None:
-    namespace_data = get_namespace_data(arguments, 'command', nargs='?')
+    namespace_data = get_namespace_data(arguments, 'command')
     if namespace_data.unknown_arguments:
         handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
         return
@@ -104,7 +101,7 @@ def handle_help_command(arguments: List[str], terminal: Console) -> None:
 async def handle_ping_command(
     url: str, arguments: List[str], terminal: Console, client: WebSocketConnection, settings: Settings
 ) -> None:
-    namespace_data = get_namespace_data(arguments, 'message', nargs='?')
+    namespace_data = get_namespace_data(arguments, 'message')
     if namespace_data.unknown_arguments:
         handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
         return
@@ -135,7 +132,7 @@ async def handle_ping_command(
 
 
 async def handle_pong_command(url: str, arguments: List[str], terminal: Console, client: WebSocketConnection) -> None:
-    namespace_data = get_namespace_data(arguments, 'message', nargs='?')
+    namespace_data = get_namespace_data(arguments, 'message')
     if namespace_data.unknown_arguments:
         handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
         return
@@ -159,7 +156,7 @@ async def handle_pong_command(url: str, arguments: List[str], terminal: Console,
 async def handle_data_command(
     arguments: List[str], terminal: Console, client: WebSocketConnection, is_byte: bool = False
 ) -> None:
-    namespace_data = get_namespace_data(arguments, 'message', nargs='?')
+    namespace_data = get_namespace_data(arguments, 'message')
     if namespace_data.unknown_arguments:
         handle_unknown_arguments(namespace_data.unknown_arguments, terminal)
         return
