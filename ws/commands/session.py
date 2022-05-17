@@ -40,21 +40,28 @@ async def interact(url: str, filename: str = None) -> None:
                 if command.name == Command.QUIT.value:
                     console.print(good_bye_message)
                     break
+
                 elif command.name == Command.CLOSE.value:
                     ok = await handle_close(command.args, console, client)
                     if ok:
                         console.print(good_bye_message)
                         break
+
                 elif command.name == Command.HELP.value:
                     handle_help_command(command.args, console)
+
                 elif command.name == Command.PING.value:
                     await handle_ping_command(url, command.args, console, client, settings)
+
                 elif command.name == Command.PONG.value:
                     await handle_pong_command(url, command.args, console, client)
+
                 elif command.name == Command.TEXT.value:
                     await handle_data_command(command.args, console, client)
+
                 elif command.name == Command.BYTE.value:
                     await handle_data_command(command.args, console, client, is_byte=True)
+
                 else:
                     commands = [command.value for command in Command]
                     print_unknown_command_message(command.name, commands, console)

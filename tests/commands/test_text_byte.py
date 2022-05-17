@@ -19,13 +19,14 @@ async def handler(request: WebSocketRequest, messages: set) -> None:
 
 
 @pytest.mark.parametrize('message', [b'hello', 'hello'])
-async def test_should_send_given_message(nursery, message):
+async def test_should_send_given_message(capsys, nursery, message):
     messages = set()
     await nursery.start(serve_websocket, functools.partial(handler, messages=messages), 'localhost', 1234, None)
     with trio.move_on_after(0.1):
         await main('ws://localhost:1234', message)
 
     assert messages == {message}
+    assert capsys.readouterr().out == 'Sent 5.0 B of data over the wire.\n'
 
 
 @pytest.mark.parametrize(('command', 'expected'), [('byte', b'hello'), ('text', 'hello')])
