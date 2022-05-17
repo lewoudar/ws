@@ -55,7 +55,7 @@ async def test_should_send_raw_message_and_print_its_length(capsys, mocker, nurs
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
 
-    assert 'Sent data over the wire.\n' in output
+    assert 'Sent 11.0 B of data over the wire.\n' in output
     assert 'Bye!' in output
 
 
@@ -69,5 +69,5 @@ async def test_should_send_message_in_file_and_print_its_length(capsys, tmp_path
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
 
-    assert 'Sent data over the wire.\n' in output
+    assert 'Sent 11.0 B of data over the wire.\n' in output
     assert 'Bye!' in output

@@ -13,6 +13,7 @@ from trio_websocket import WebSocketConnection
 from ws.parameters import get_normalized_message
 from ws.settings import Settings
 from ws.utils.documentation import BYTE_HELP, CLOSE_HELP, HELP, PING_HELP, PONG_HELP, QUIT_HELP, TEXT_HELP
+from ws.utils.size import get_readable_size
 
 
 @dataclass(frozen=True)
@@ -186,7 +187,8 @@ async def handle_data_command(
         return
 
     await client.send_message(message)
-    terminal.print('Sent data over the wire.\n')
+    length = len(message)
+    terminal.print(f'Sent {get_readable_size(length)} of data over the wire.\n')
 
 
 async def handle_close(arguments: List[str], terminal: Console, client: WebSocketConnection) -> bool:
