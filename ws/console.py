@@ -11,6 +11,7 @@ data = {
     'warning': Style(color='yellow'),
     'label': Style(color='yellow'),
     'info': Style(color='blue'),
+    'success': Style(color='green'),
     'number': Style(color='cyan', bold=True),
     'prompt': Style(color='bright_cyan'),
 }
