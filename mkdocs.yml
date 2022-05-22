@@ -1,0 +1,35 @@
+site_name: ws
+site_description: ws package documentation
+site_author: Kevin Tewouda
+site_url: https://ws.readthedocs.io
+
+repo_url: https://github.com/lewoudar/ws/
+edit_uri: tree/main/docs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Settings: settings.md
+  - Commands:
+      - Install completion: commands/completion.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - codehilite:
+      css_class: highlight
