@@ -27,7 +27,7 @@ def test_should_read_values_from_environment(monkeypatch, tmp_path):
     ca.write_text('fake ca')
     monkeypatch.setenv('WS_CONNECT_TIMEOUT', '1')
     monkeypatch.setenv('WS_RESPONSE_TIMEOUT', 'inf')
-    monkeypatch.setenv('WS_EXTRA_HEADERS', '{"X-Foo": "bar"}')
+    monkeypatch.setenv('WS_EXTRA_HEADERS', '[["X-Foo", "bar"]]')
     monkeypatch.setenv('ws_disconnect_timeout', '3')
     monkeypatch.setenv('WS_message_queue_size', '10')
     monkeypatch.setenv('ws_tls_ca_file', f'{ca}')
@@ -37,7 +37,7 @@ def test_should_read_values_from_environment(monkeypatch, tmp_path):
     assert settings.disconnect_timeout == 3.0
     assert settings.response_timeout is math.inf
     assert settings.message_queue_size == 10
-    assert settings.extra_headers == {'X-Foo': 'bar'}
+    assert settings.extra_headers == [('X-Foo', 'bar')]
     assert settings.tls_ca_file == ca
     assert settings.max_message_size == 1024 * 1024  # default value not changed
 
