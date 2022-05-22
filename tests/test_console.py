@@ -43,7 +43,10 @@ class TestSaveOutput:
 
         assert file_path.exists()
         output = file_path.read_text()
-        assert 'hello world' in output
-        # we check the title of the svg file
+
+        if file_path.suffix != '.svg':
+            assert 'hello world' in output
+        # we check svg specific case
         if file_path.suffix == '.svg':
+            assert 'hello&#160;world' in output
             assert file_path.name in output

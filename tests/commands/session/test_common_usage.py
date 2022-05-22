@@ -79,14 +79,25 @@ async def test_should_print_input_and_save_it_in_a_file(capsys, tmp_path, mocker
     await main('ws://localhost:1234', filename=f'{file_path}')
     terminal_output = capsys.readouterr().out
 
-    assert 'Welcome to the interactive websocket session! 🌟\n' in terminal_output
-    assert 'The session program lets you interact with a websocket endpoint' in terminal_output
-    assert 'Bye! 👋\n' in terminal_output
+    first_sentence = 'Welcome to the interactive websocket session! 🌟\n'
+    second_sentence = 'The session program lets you interact with a websocket endpoint'
+    last_sentence = 'Bye! 👋\n'
+    assert first_sentence in terminal_output
+    assert second_sentence in terminal_output
+    assert last_sentence in terminal_output
 
     file_output = file_path.read_text()
-    assert 'Welcome to the interactive websocket session! 🌟' in file_output
-    assert 'The session program lets you interact with a websocket endpoint' in file_output
-    assert 'Bye! 👋' in file_output
+
+    first_sentence = first_sentence.replace('\n', '')
+    last_sentence = last_sentence.replace('\n', '')
+    if file_path.suffix == '.svg':
+        assert first_sentence.replace(' ', '&#160;') in file_output
+        assert second_sentence.replace(' ', '&#160;') in file_output
+        assert last_sentence.replace(' ', '&#160;') in file_output
+    else:
+        assert first_sentence in terminal_output
+        assert second_sentence in terminal_output
+        assert last_sentence in file_output
 
 
 def test_should_check_trio_run_is_correctly_called_without_options(runner, mocker):
