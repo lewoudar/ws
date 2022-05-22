@@ -14,7 +14,6 @@ def test_should_check_default_setting_values(test_console):
     assert settings.response_timeout == 5.0
     assert settings.max_message_size == 1024 * 1024
     assert settings.message_queue_size == 1
-    assert settings.receive_buffer == 4 * 1024
     assert settings.terminal_width == test_console.width
     assert settings.extra_headers is None
     assert settings.tls_ca_file is None
@@ -51,7 +50,6 @@ def test_should_read_values_from_environment(monkeypatch, tmp_path):
         'response_timeout',
         'message_queue_size',
         'max_message_size',
-        'receive_buffer',
     ],
 )
 def test_should_raise_error_when_given_value_is_incorrect(monkeypatch, field):
