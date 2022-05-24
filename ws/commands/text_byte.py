@@ -15,7 +15,7 @@ async def send_message(url: str, message: AnyStr) -> None:
     async with websocket_client(url) as client:
         await client.send_message(message)
         length = len(message)
-        console.print(f'Sent {get_readable_size(length)} of data over the wire.')
+        console.print(f'Sent [number]{get_readable_size(length)}[/] of data over the wire.')
         # the sleep is to give time to the server to handle the message before closing the client
         # and also to make the tests passed :D
         await trio.sleep(0.1)

@@ -116,7 +116,7 @@ async def test_should_make_one_pong_with_default_values(capsys, nursery):
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main_pong(url, number, interval)
 
-    assert f'Sent unsolicited PONG of 0 bytes of data to {url}\nsequence=1, time=' in capsys.readouterr().out
+    assert f'Sent unsolicited PONG of 0 byte of data to {url}\nsequence=1, time=' in capsys.readouterr().out
 
 
 @ping_pong_parametrize

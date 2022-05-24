@@ -133,10 +133,10 @@ async def handle_ping_command(
     if scope.cancelled_caught:
         terminal.print(
             f'[warning]Unable to receive pong before configured response timeout'
-            f' ([/][number]{settings.response_timeout}[/][warning]s).\n'
+            f' ([/][number]{settings.response_timeout}[/]s).\n'
         )
     else:
-        terminal.print(f'Took [number]{duration:.2f}[/]s to receive a PONG.\n')
+        terminal.print(f'Took [number]{duration:.2f}s[/] to receive a PONG.\n')
 
 
 async def handle_pong_command(url: str, arguments: List[str], terminal: Console, client: WebSocketConnection) -> None:
@@ -165,7 +165,7 @@ async def handle_pong_command(url: str, arguments: List[str], terminal: Console,
     before = trio.current_time()
     await client.pong(message)
     duration = trio.current_time() - before
-    terminal.print(f'Took [number]{duration:.2f}[/]s to send the PONG.\n')
+    terminal.print(f'Took [number]{duration:.2f}s[/] to send the PONG.\n')
 
 
 async def handle_data_command(
@@ -188,7 +188,7 @@ async def handle_data_command(
 
     await client.send_message(message)
     length = len(message)
-    terminal.print(f'Sent {get_readable_size(length)} of data over the wire.\n')
+    terminal.print(f'Sent [number]{get_readable_size(length)}[/] of data over the wire.\n')
 
 
 async def handle_close(arguments: List[str], terminal: Console, client: WebSocketConnection) -> bool:

@@ -33,7 +33,7 @@ async def make_ping(url: str, number: int, interval: float, message: bytes = Non
             with trio.fail_after(settings.response_timeout):
                 await client.ping(message)
                 duration = trio.current_time() - beginning
-                console.print(f'[label]sequence[/]=[number]{counter}[/], [label]time[/]=[number]{duration:.2f}[/]s')
+                console.print(f'[label]sequence[/]=[number]{counter}[/], [label]time[/]=[number]{duration:.2f}s[/]')
 
             if 0 < number <= counter:
                 break

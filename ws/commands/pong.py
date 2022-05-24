@@ -20,7 +20,8 @@ async def make_pong(url: str, number: int, interval: float, message: bytes = Non
     message = b'' if message is None else message
     payload_length = len(message)
     configure_console_recording(console, get_settings(), filename)
-    console.print(f'Sent unsolicited PONG of {payload_length} bytes of data to [info]{url}[/]')
+    plural = 's' if payload_length > 1 else ''
+    console.print(f'Sent unsolicited PONG of {payload_length} byte{plural} of data to [info]{url}[/]')
 
     counter = 0
     async with websocket_client(url) as client:
@@ -29,7 +30,7 @@ async def make_pong(url: str, number: int, interval: float, message: bytes = Non
             beginning = trio.current_time()
             await client.pong(message)
             duration = trio.current_time() - beginning
-            console.print(f'[label]sequence[/]=[number]{counter}[/], [label]time[/]=[number]{duration:.2f}[/]s')
+            console.print(f'[label]sequence[/]=[number]{counter}[/], [label]time[/]=[number]{duration:.2f}s[/]')
 
             if 0 < number <= counter:
                 break
