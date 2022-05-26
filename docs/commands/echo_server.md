@@ -18,7 +18,7 @@ Options:
   -h, --help                Show this message and exit.
 ```
 
-Example usage:
+## Example usage
 
 Listens only ipv6 addresses on port 8000.
 

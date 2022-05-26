@@ -29,6 +29,7 @@ nav:
       - Echo Server: commands/echo_server.md
       - Listen and Tail: commands/listen_and_tail.md
       - Ping and Pong: commands/ping_and_pong.md
+      - Text and Byte: commands/text_and_byte.md
 
 markdown_extensions:
   - toc:

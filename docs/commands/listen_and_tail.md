@@ -1,4 +1,4 @@
-# listen
+## listen
 
 This command lets you sniff messages on a specific path of a websocket server.
 
@@ -20,7 +20,7 @@ Options:
   -h, --help                  Show this message and exit.
 ```
 
-## Example usage
+### Example usage
 
 For my examples, I will consider this little server script, but you can of course use you own server.
 
@@ -111,7 +111,7 @@ This is what I got (OK, it is a little small, but you got the idea 😛). ![exam
     Another way to save the file to avoid this issue is to use output redirection i.e.
     `ws listen :8000 -d 4 --json > file.txt`. Of course, this only works if you want to save output in **plain text**.
 
-# tail
+## tail
 
 When running a potential long command like `ws listen`, you may want to do it in the background and if you save output
 in a file, check content from time to time. This is where the [tail](https://man7.org/linux/man-pages/man1/tail.1.html)
@@ -130,6 +130,8 @@ Options:
   -f, --follow
   -h, --help        Show this message and exit.
 ```
+
+### Example usage
 
 The following example will follow the file `listen.txt`.
 

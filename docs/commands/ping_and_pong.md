@@ -1,4 +1,4 @@
-# ping
+## ping
 
 This command lets you PING a websocket server to check if it is still alive.
 
@@ -25,7 +25,7 @@ Options:
   -h, --help                  Show this message and exit.
 ```
 
-## Example usage
+### Example usage
 
 The basic example is at follows:
 
@@ -122,7 +122,7 @@ Here is what I got (ok it is small, but you got the idea 😛). ![ping output in
     You can close the program ahead of time using `Ctrl+C`. On linux/unix systems you can use the `SIGTERM` signal to
     kill the process.
 
-# pong
+## pong
 
 This command allows to send unsolicited pongs to a server and (maybe) see how it reacts to it.
 
@@ -149,7 +149,7 @@ Options:
   -h, --help                  Show this message and exit.
 ```
 
-## Example usage
+### Example usage
 
 The basic usage is at follows:
 
