@@ -103,13 +103,14 @@ In this example we run the `ws listen` command for 4s and save the content in th
 $ ws listen :8000 -d 4 --json -f listen.svg
 ```
 
-This is what I got (OK, it is a little small, but you got the idea 😛). ![example of svg file result](../img/listen.svg)
+This is what I got. ![example of svg file result](../img/listen.svg)
 
 !!! warning
-    The output is saved in RAM memory, so you probably don't want to run the program for a **very long time** if you
-    don't want to run out of memory.
+    If you want to save output, bear in mind that it is saved in RAM memory, so you probably don't want to run the
+    program for a **very long time** if you don't want to run out of memory.
+
     Another way to save the file to avoid this issue is to use output redirection i.e.
-    `ws listen :8000 -d 4 --json > file.txt`. Of course, this only works if you want to save output in **plain text**.
+    `ws listen :8000 -d 4 --json > listen.txt`. Of course, this only works if you want to save output in **plain text**.
 
 ## tail
 

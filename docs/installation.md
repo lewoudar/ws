@@ -25,3 +25,28 @@ ws starts working from **python3.7** and also supports **pypy3**. It has the fol
 - [click-didyoumean](https://pypi.org/project/click-didyoumean/) for command suggestions in case of typos.
 - [rich](https://rich.readthedocs.io/en/latest/) for beautiful output display.
 - [shellingham](https://pypi.org/project/shellingham/) to detect the shell used.
+
+
+To confirm the installation works, you can type the command name in the terminal.
+
+```shell
+$ ws
+Usage: ws [OPTIONS] COMMAND [ARGS]...
+
+  A convenient websocket cli.
+
+Options:
+  --version   Show the version and exit.
+  -h, --help  Show this message and exit.
+
+Commands:
+  byte                Sends binary message to URL endpoint.
+  echo-server         Runs an echo websocket server.
+  install-completion  Install completion script for bash, zsh and fish...
+  listen              Listens messages on a given URL.
+  ping                Pings a websocket server located at URL.
+  pong                Sends a pong to websocket server located at URL.
+  session             Opens an interactive session to communicate with...
+  tail                An emulator of the tail unix command that output...
+  text                Sends text message on URL endpoint.
+```

@@ -112,7 +112,15 @@ Last but not least, you can save terminal output in a file. There are three supp
 $ ws ping wss://ws.postman-echo.com/raw -n 4 -f ping.svg
 ```
 
-Here is what I got (ok it is small, but you got the idea 😛). ![ping output in svg format](../img/ping.svg)
+Here is what I got. ![ping output in svg format](../img/ping.svg)
+
+!!! warning
+    If you want to save output, bear in mind that it is saved in RAM memory, so you probably don't want to run the
+    program for a **very long time** if you don't want to run out of memory.
+
+    Another way to save the file to avoid this issue is to use output redirection i.e.
+    `ws ping wss://ws.postman-echo.com/raw -n 4 > ping.txt`. Of course, this only works if you want to save output
+    in **plain text**.
 
 !!! note
     You may want to adjust the terminal width before saving content to adjust the output size. Look at the
