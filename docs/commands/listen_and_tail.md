@@ -20,7 +20,7 @@ Options:
   -h, --help                  Show this message and exit.
 ```
 
-Example usage:
+## Example usage
 
 For my examples, I will consider this little server script, but you can of course use you own server.
 
@@ -86,7 +86,7 @@ minutes.
 $ ws listen :8000 -d 120
 ```
 
-You can also save the terminal output in a file if you wish. There are three format of output supported.
+You can also save the terminal output in a file if you wish. There are three supported output formats:
 
 - **html**: To save a file in html, the file you provide must end with the suffix `.html` like `file.html`.
 - **svg**: To save a file in svg, the file you provide must end with the suffix `.svg` like `file.svg`.
@@ -103,7 +103,7 @@ In this example we run the `ws listen` command for 4s and save the content in th
 $ ws listen :8000 -d 4 --json -f listen.svg
 ```
 
-This is what I got (OK, it is a little small, but you got the idea :p). ![screenshot example](../img/listen.svg)
+This is what I got (OK, it is a little small, but you got the idea 😛). ![example of svg file result](../img/listen.svg)
 
 !!! warning
     The output is saved in RAM memory, so you probably don't want to run the program for a **very long time** if you

@@ -25,9 +25,10 @@ nav:
   - Installation: installation.md
   - Settings: settings.md
   - Commands:
-      - Install completion: commands/completion.md
-      - Echo server: commands/echo_server.md
-      - Listen and tail: commands/listen_and_tail.md
+      - Install Completion: commands/completion.md
+      - Echo Server: commands/echo_server.md
+      - Listen and Tail: commands/listen_and_tail.md
+      - Ping and Pong: commands/ping_and_pong.md
 
 markdown_extensions:
   - toc:
