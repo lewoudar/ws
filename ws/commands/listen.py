@@ -18,7 +18,7 @@ def trace_rule(terminal: Console, is_bytes: bool) -> None:
     date = datetime.now()
     message_type = 'BINARY' if is_bytes else 'TEXT'
 
-    terminal.rule(f'[bold info]{message_type} message at {date:%Y-%m-%d %H:%M:%S}')
+    terminal.rule(f'[bold info]{message_type} message on {date:%Y-%m-%d %H:%M:%S}')
 
 
 def print_message(terminal: Console, message: AnyStr, is_bytes: bool) -> None:

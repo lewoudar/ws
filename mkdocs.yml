@@ -26,6 +26,8 @@ nav:
   - Settings: settings.md
   - Commands:
       - Install completion: commands/completion.md
+      - Echo server: commands/echo_server.md
+      - Listen and tail: commands/listen_and_tail.md
 
 markdown_extensions:
   - toc:

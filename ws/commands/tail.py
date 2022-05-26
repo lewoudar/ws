@@ -51,8 +51,8 @@ async def main(filename: str, lines_count: int, follow: bool) -> None:
 @click.option('-f', '--follow', is_flag=True)
 def tail(filename: str, lines_count: int, follow: bool):
     """
-    An emulator of the tail unix command that output the last part of FILENAME.
-    It is a poor implementation of the tail command. It only handles one file at a time and only
+    An emulator of the tail unix command that output the last lines of FILENAME.
+    It is a light implementation of the tail command. It only handles one file at a time and only
     supports two options, so for linux/unix users, you should use the builtin command.
     """
     trio.run(main, filename, lines_count, follow)

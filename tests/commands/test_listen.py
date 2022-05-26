@@ -17,7 +17,7 @@ class TestTraceRule:
     def test_should_print_rule_and_message(self, test_console, is_bytes, message_type):
         trace_rule(test_console, is_bytes=is_bytes)
 
-        assert f'─ {message_type} message at 2022-04-14 20:10:00 ─' in test_console.file.getvalue()
+        assert f'─ {message_type} message on 2022-04-14 20:10:00 ─' in test_console.file.getvalue()
 
 
 class TestPrintMessage:
@@ -101,8 +101,8 @@ async def test_should_read_incoming_messages_with_json_flag(nursery, capsys):
     # sometimes I have 9 messages, other times 10, probably due to the behaviour of move_on_after or the system
     # clock
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message at') in (9, 10)
-    assert output.count('─ BINARY message at') in (9, 10)
+    assert output.count('─ TEXT message on') in (9, 10)
+    assert output.count('─ BINARY message on') in (9, 10)
     assert output.count('{\n  "hello": "world"\n}\n') in (18, 19, 20)
 
 
@@ -112,9 +112,9 @@ async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
         await main('ws://localhost:1234', False)
 
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message at') in (9, 10)
+    assert output.count('─ TEXT message on') in (9, 10)
     assert output.count('{"hello": "world"}\n') in (9, 10)
-    assert output.count('─ BINARY message at') in (9, 10)
+    assert output.count('─ BINARY message on') in (9, 10)
     assert output.count('b\'{"hello": "world"}\'\n') in (9, 10)
 
 
@@ -123,9 +123,9 @@ async def test_should_read_messages_for_a_given_amount_of_time(nursery, capsys):
     await main('ws://localhost:1234', False, duration=0.5)
 
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message at') in (4, 5)
+    assert output.count('─ TEXT message on') in (4, 5)
     assert output.count('{"hello": "world"}\n') in (4, 5)
-    assert output.count('─ BINARY message at') in (4, 5)
+    assert output.count('─ BINARY message on') in (4, 5)
     assert output.count('b\'{"hello": "world"}\'\n') in (4, 5)
 
 
@@ -137,16 +137,16 @@ async def test_should_read_messages_and_save_them_in_a_file(tmp_path, nursery, c
     await main('ws://localhost:1234', False, duration=0.5, filename=f'{file_path}')
 
     terminal_output = capsys.readouterr().out
-    assert terminal_output.count('─ TEXT message at') in (4, 5)
+    assert terminal_output.count('─ TEXT message on') in (4, 5)
     assert file_path.exists()
 
     file_output = file_path.read_text()
     if file_path.suffix == '.svg':
-        assert file_output.count('TEXT&#160;message&#160;at') in (4, 5)
-        assert 4 <= file_output.count('BINARY&#160;message&#160;at') in (4, 5)
+        assert file_output.count('TEXT&#160;message&#160;on') in (4, 5)
+        assert 4 <= file_output.count('BINARY&#160;message&#160;on') in (4, 5)
     else:
-        assert file_output.count('TEXT message at') in (4, 5)
-        assert 4 <= file_output.count('BINARY message at') in (4, 5)
+        assert file_output.count('TEXT message on') in (4, 5)
+        assert 4 <= file_output.count('BINARY message on') in (4, 5)
     assert file_output.count('hello') in (8, 9, 10)
     assert file_output.count('world') in (8, 9, 10)
 

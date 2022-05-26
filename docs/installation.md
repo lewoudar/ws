@@ -17,7 +17,7 @@ ws starts working from **python3.7** and also supports **pypy3**. It has the fol
 
 - [trio](https://trio.readthedocs.io/en/stable/) / [anyio](https://anyio.readthedocs.io/en/stable/) for structured
   (async) concurrency support.
-- [trio_websocket](https://trio-websocket.readthedocs.io/en/stable/) the library implementing the websocket protocol.
+- [trio-websocket](https://trio-websocket.readthedocs.io/en/stable/) the library implementing the websocket protocol.
 - [pydantic](https://pydantic-docs.helpmanual.io/) / [python-dotenv](https://pypi.org/project/python-dotenv/) for
   input validation and settings management.
 - [certifi](https://pypi.org/project/certifi/) to manage TLS and certificates.
