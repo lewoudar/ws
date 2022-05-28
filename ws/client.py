@@ -77,10 +77,11 @@ async def websocket_client(url: str) -> WebSocketConnection:
         'max_message_size': settings.max_message_size,
         'extra_headers': settings.extra_headers,
     }
+    # pypy is stricter than CPython here if we don't convert path to strings
     ssl_context = get_client_ssl_context(
-        ca_file=settings.tls_ca_file,
-        certificate=settings.tls_certificate_file,
-        keyfile=settings.tls_key_file,
+        ca_file=str(settings.tls_ca_file),
+        certificate=str(settings.tls_certificate_file),
+        keyfile=str(settings.tls_key_file),
         password=settings.tls_password,
     )
 

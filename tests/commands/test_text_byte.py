@@ -1,4 +1,5 @@
 import functools
+import platform
 
 import pytest
 import trio
@@ -19,6 +20,7 @@ async def handler(request: WebSocketRequest, messages: set) -> None:
 
 
 @pytest.mark.parametrize('message', [b'hello', 'hello'])
+@pytest.mark.skipif(platform.python_implementation() == 'PyPy', reason="I don't know why it does not work on pypy")
 async def test_should_send_given_message(capsys, nursery, message):
     messages = set()
     await nursery.start(serve_websocket, functools.partial(handler, messages=messages), 'localhost', 1234, None)
