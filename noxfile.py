@@ -18,6 +18,14 @@ def lint(session):
     session.run('bandit', '-r', source_code)
 
 
+@nox.session(python=PYTHON_VERSIONS[-1])
+def safety(session):
+    """Checks vulnerabilities of the installed packages."""
+    session.install('poetry>=1.0.0,<2.0.0')
+    session.run('poetry', 'install')
+    session.run('safety', 'check')
+
+
 @nox.session(python=PYTHON_VERSIONS)
 def tests(session):
     """Runs the test suite."""

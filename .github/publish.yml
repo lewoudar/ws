@@ -1,0 +1,24 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    timeout-minutes: 10
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install python dependencies
+        run: python -m pip install -U pip nox
+      - name: Build and deploy
+        run: nox -s deploy
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_token }}
