@@ -98,12 +98,12 @@ async def test_should_read_incoming_messages_with_json_flag(nursery, capsys):
     with trio.move_on_after(1):
         await main('ws://localhost:1234', True)
 
-    # sometimes I have 9 messages, other times 10, probably due to the behaviour of move_on_after or the system
-    # clock
+    # Depending on the OS where the tests are run, the numbers varies a lot, what I used here is based on the
+    # results I have in GitHub actions
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message on') in (9, 10)
-    assert output.count('─ BINARY message on') in (9, 10)
-    assert output.count('{\n  "hello": "world"\n}\n') in (18, 19, 20)
+    assert output.count('─ TEXT message on') in tuple(range(5, 11))
+    assert output.count('─ BINARY message on') in tuple(range(5, 11))
+    assert output.count('{\n  "hello": "world"\n}\n') in tuple(range(10, 21))
 
 
 async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
@@ -112,10 +112,12 @@ async def test_should_read_incoming_messages_without_json_flag(nursery, capsys):
         await main('ws://localhost:1234', False)
 
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message on') in (9, 10)
-    assert output.count('{"hello": "world"}\n') in (9, 10)
-    assert output.count('─ BINARY message on') in (9, 10)
-    assert output.count('b\'{"hello": "world"}\'\n') in (9, 10)
+    interval = tuple(range(5, 11))
+
+    assert output.count('─ TEXT message on') in interval
+    assert output.count('{"hello": "world"}\n') in interval
+    assert output.count('─ BINARY message on') in interval
+    assert output.count('b\'{"hello": "world"}\'\n') in interval
 
 
 async def test_should_read_messages_for_a_given_amount_of_time(nursery, capsys):
@@ -123,32 +125,36 @@ async def test_should_read_messages_for_a_given_amount_of_time(nursery, capsys):
     await main('ws://localhost:1234', False, duration=0.5)
 
     output = capsys.readouterr().out
-    assert output.count('─ TEXT message on') in (4, 5)
-    assert output.count('{"hello": "world"}\n') in (4, 5)
-    assert output.count('─ BINARY message on') in (4, 5)
-    assert output.count('b\'{"hello": "world"}\'\n') in (4, 5)
+    interval = tuple(range(3, 6))
+
+    assert output.count('─ TEXT message on') in interval
+    assert output.count('{"hello": "world"}\n') in interval
+    assert output.count('─ BINARY message on') in interval
+    assert output.count('b\'{"hello": "world"}\'\n') in interval
 
 
 @pytest.mark.parametrize('filename', ['file.txt', 'file.html', 'file.svg'])
 @pytest.mark.usefixtures('reset_console')
 async def test_should_read_messages_and_save_them_in_a_file(tmp_path, nursery, capsys, filename):
     file_path = tmp_path / filename
+    message_interval = tuple(range(3, 6))
+    hello_world_interval = tuple(range(6, 11))
     await nursery.start(serve_websocket, handler, 'localhost', 1234, None)
     await main('ws://localhost:1234', False, duration=0.5, filename=f'{file_path}')
 
     terminal_output = capsys.readouterr().out
-    assert terminal_output.count('─ TEXT message on') in (4, 5)
+    assert terminal_output.count('─ TEXT message on') in message_interval
     assert file_path.exists()
 
     file_output = file_path.read_text()
     if file_path.suffix == '.svg':
-        assert file_output.count('TEXT&#160;message&#160;on') in (4, 5)
-        assert 4 <= file_output.count('BINARY&#160;message&#160;on') in (4, 5)
+        assert file_output.count('TEXT&#160;message&#160;on') in message_interval
+        assert 3 <= file_output.count('BINARY&#160;message&#160;on') in message_interval
     else:
-        assert file_output.count('TEXT message on') in (4, 5)
-        assert 4 <= file_output.count('BINARY message on') in (4, 5)
-    assert file_output.count('hello') in (8, 9, 10)
-    assert file_output.count('world') in (8, 9, 10)
+        assert file_output.count('TEXT message on') in message_interval
+        assert 3 <= file_output.count('BINARY message on') in message_interval
+    assert file_output.count('hello') in hello_world_interval
+    assert file_output.count('world') in hello_world_interval
 
 
 def test_should_check_trio_run_is_correctly_called_without_options(runner, mocker):
