@@ -3,7 +3,7 @@
 [![Pypi version](https://img.shields.io/pypi/v/ws.svg)](https://pypi.org/project/ws/)
 ![](https://github.com/lewoudar/ws/workflows/CI/badge.svg)
 [![Coverage Status](https://codecov.io/gh/lewoudar/ws/branch/main/graphs/badge.svg?branch=main)](https://codecov.io/gh/lewoudar/ws)
-[![Documentation Status](https://readthedocs.org/projects/ws/badge/?version=latest)](https://ws.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pyws/badge/?version=latest)](https://pyws.readthedocs.io/en/latest/?badge=latest)
 [![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/wntrblm/nox)
 [![License Apache 2](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
@@ -131,7 +131,7 @@ Bye! 👋
 ```
 ## Documentation
 
-The full documentation can be found at https://ws.readthedocs.io
+The full documentation can be found at https://pyws.readthedocs.io
 
 ## Limitations
 

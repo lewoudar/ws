@@ -1,7 +1,7 @@
-site_name: ws
+site_name: pyws
 site_description: ws package documentation
 site_author: Kevin Tewouda
-site_url: https://ws.readthedocs.io
+site_url: https://pyws.readthedocs.io
 
 repo_url: https://github.com/lewoudar/ws/
 edit_uri: tree/main/docs
