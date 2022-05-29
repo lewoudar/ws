@@ -18,6 +18,9 @@ jobs:
           # unable to install cryptography on this job
           - os: macos-latest
             python: pypy-3.7
+          # weird error when installing packages with poetry
+          - os: windows-latest
+            python: pypy-3.7
 
     steps:
       - uses: actions/checkout@v2
