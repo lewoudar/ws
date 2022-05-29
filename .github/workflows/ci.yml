@@ -18,6 +18,9 @@ jobs:
           # unable to install cryptography on this job
           - os: macos-latest
             python: pypy-3.7
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v2
