@@ -149,10 +149,10 @@ async def test_should_read_messages_and_save_them_in_a_file(tmp_path, nursery, c
     file_output = file_path.read_text()
     if file_path.suffix == '.svg':
         assert file_output.count('TEXT&#160;message&#160;on') in message_interval
-        assert 3 <= file_output.count('BINARY&#160;message&#160;on') in message_interval
+        assert 2 <= file_output.count('BINARY&#160;message&#160;on') in message_interval
     else:
         assert file_output.count('TEXT message on') in message_interval
-        assert 3 <= file_output.count('BINARY message on') in message_interval
+        assert 2 <= file_output.count('BINARY message on') in message_interval
     assert file_output.count('hello') in hello_world_interval
     assert file_output.count('world') in hello_world_interval
 
