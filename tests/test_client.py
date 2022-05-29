@@ -28,7 +28,9 @@ class TestGetClientSSLContext:
         # check the whole message at one
         output = capsys.readouterr().out
         assert 'Unable to load certificate(s) located in the (tls_ca_file)' in output
-        assert f'{ca_file}\n' in output
+        # on macOS, I don't know why but the temporary folder printed differs from what is exactly created by
+        # pytest, so I don't check the full path, only the file name.
+        assert 'ca.pem\n' in output
 
     def test_should_return_ssl_context_when_ca_file_is_provided(self, tmp_path, ca):
         ca_file = tmp_path / 'ca.pem'

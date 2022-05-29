@@ -1,3 +1,5 @@
+import platform
+
 import click
 import pytest
 
@@ -44,6 +46,7 @@ class TestGetNormalizedMessage:
         assert 'file foo.txt does not exist' == str(exc_info.value)
 
     @pytest.mark.parametrize('is_bytes', [True, False])
+    @pytest.mark.skipif(platform.system() == 'Windows', reason='chmod seems to not work as expected on windows')
     def test_should_raise_error_when_file_cannot_be_opened(self, tmp_path, is_bytes):
         dummy_file = tmp_path / 'file.txt'
         dummy_file.write_text('Hello world')

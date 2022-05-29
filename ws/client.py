@@ -23,7 +23,8 @@ def get_client_ssl_context(
     if ca_file:
         try:
             # noinspection PyTypeChecker
-            context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=ca_file)
+            # PyPy is stricter than CPython here if we don't convert Path object to string, we will get an error
+            context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=str(ca_file))
         except ssl.SSLError:
             console.print(f'[error]Unable to load certificate(s) located in the (tls_ca_file) file {ca_file}')
             raise SystemExit(1)
@@ -37,11 +38,11 @@ def get_client_ssl_context(
             context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=certifi.where())
         additional_arguments = {}
         if keyfile:
-            additional_arguments['keyfile'] = keyfile
+            additional_arguments['keyfile'] = str(keyfile)
         if password:
             additional_arguments['password'] = password
         try:
-            context.load_cert_chain(certificate, **additional_arguments)
+            context.load_cert_chain(str(certificate), **additional_arguments)
         except ssl.SSLError:
             message = (
                 'Unable to load the certificate with the provided information.\n'

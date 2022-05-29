@@ -75,7 +75,7 @@ async def test_should_run_server_without_tls(nursery):
 
 
 async def test_should_run_server_with_tls_certificate(capsys, nursery, certificate, client_context):
-    nursery.start_soon(main, 'localhost', 1234, certificate)
+    nursery.start_soon(main, 'localhost', 1234, f'{certificate}')
     await trio.sleep(1)
     async with open_websocket_url('wss://localhost:1234/foo', ssl_context=client_context) as ws:
         await ws.send_message('hello world')
@@ -85,7 +85,7 @@ async def test_should_run_server_with_tls_certificate(capsys, nursery, certifica
 
 
 async def test_should_run_server_with_tls_certificate_and_key_file(nursery, certificate, private_key, client_context):
-    nursery.start_soon(main, 'localhost', 1234, certificate, private_key)
+    nursery.start_soon(main, 'localhost', 1234, f'{certificate}', f'{private_key}')
     await trio.sleep(1)
     async with open_websocket_url('wss://localhost:1234/foo', ssl_context=client_context) as ws:
         await ws.send_message('hello world')

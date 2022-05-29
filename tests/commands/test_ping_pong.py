@@ -143,7 +143,7 @@ async def test_should_make_infinite_number_of_pings_and_pongs(capsys, nursery, p
     await ping_pong('ws://localhost:1234', number, interval)
     data = capsys.readouterr().out
 
-    assert data.count('sequence') == 2
+    assert data.count('sequence') in (2, 3)
 
 
 @ping_pong_parametrize
