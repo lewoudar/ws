@@ -3,14 +3,14 @@
 You can install the cli with `pip`:
 
 ```shell
-$ pip install ws
+$ pip install websockets-cli
 ```
 
 or use a better package manager like [poetry](https://python-poetry.org/docs/):
 
 ```shell
 # you probably want to add this dependency as a dev one, this is why I put -D into square brackets
-$ poetry add [-D] ws
+$ poetry add [-D] websockets-cli
 ```
 
 ws starts working from **python3.7** and also supports **pypy3**. It has the following dependencies:

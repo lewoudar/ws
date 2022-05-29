@@ -1,4 +1,4 @@
-# ws
+# websockets-cli
 
 [![Pypi version](https://img.shields.io/pypi/v/ws.svg)](https://pypi.org/project/ws/)
 ![](https://github.com/lewoudar/ws/workflows/CI/badge.svg)
@@ -21,14 +21,14 @@ So I decided to write a cli tool for this purpose.
 You can install the cli with `pip`:
 
 ```shell
-$ pip install ws
+$ pip install websockets-cli
 ```
 
 or use a better package manager like [poetry](https://python-poetry.org/docs/):
 
 ```shell
 # you probably want to add this dependency as a dev one, this is why I put -D into square brackets
-$ poetry add [-D] ws
+$ poetry add [-D] websockets-cli
 ```
 
 ws starts working from **python3.7** and also supports **pypy3**. It has the following dependencies:

@@ -1,4 +1,4 @@
-# Welcome to the ws documentation
+# Welcome to the websockets-cli documentation
 
 A simple yet powerful websocket cli.
 

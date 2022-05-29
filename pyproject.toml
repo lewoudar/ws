@@ -1,22 +1,31 @@
 [tool.poetry]
-name = "ws"
+name = "websockets-cli"
 version = "0.1.0"
 description = "A simple yet powerful websocket cli"
 authors = ["le_woudar <lewoudar@gmail.com>"]
 readme = "README.md"
 license = "Apache-2.0"
-keywords = ["websocket", "cli", "trio"]
-repository = "https://github.com/lewoudar/certipie"
+keywords = ["websocket", "cli", "trio", "anyio"]
+
+homepage = "https://pyws.readthedocs.io"
+repository = "https://github.com/lewoudar/ws"
+documentation = "https://pyws.readthedocs.io"
 
 classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Terminals",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
+    "Framework :: Trio",
+    "Environment :: Web Environment",
+    "Programming Language :: Python :: Implementation :: PyPy"
 ]
 
 packages = [
     { include = "ws" }
 ]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/lewoudar/ws/issues"
 
 [tool.poetry.dependencies]
 python = "^3.7"
