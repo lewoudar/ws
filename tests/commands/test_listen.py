@@ -125,7 +125,7 @@ async def test_should_read_messages_for_a_given_amount_of_time(nursery, capsys):
     await main('ws://localhost:1234', False, duration=0.5)
 
     output = capsys.readouterr().out
-    interval = tuple(range(3, 6))
+    interval = tuple(range(2, 6))
 
     assert output.count('─ TEXT message on') in interval
     assert output.count('{"hello": "world"}\n') in interval
@@ -137,8 +137,8 @@ async def test_should_read_messages_for_a_given_amount_of_time(nursery, capsys):
 @pytest.mark.usefixtures('reset_console')
 async def test_should_read_messages_and_save_them_in_a_file(tmp_path, nursery, capsys, filename):
     file_path = tmp_path / filename
-    message_interval = tuple(range(3, 6))
-    hello_world_interval = tuple(range(6, 11))
+    message_interval = tuple(range(2, 6))
+    hello_world_interval = tuple(range(2, 11))
     await nursery.start(serve_websocket, handler, 'localhost', 1234, None)
     await main('ws://localhost:1234', False, duration=0.5, filename=f'{file_path}')
 
