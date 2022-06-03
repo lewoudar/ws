@@ -1,5 +1,5 @@
-site_name: pyws
-site_description: ws package documentation
+site_name: websockets-cli
+site_description: websockets-cli package documentation
 site_author: Kevin Tewouda
 site_url: https://pyws.readthedocs.io
 
