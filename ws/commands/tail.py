@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 
-import anyio
 import click
 import trio
 
@@ -27,20 +26,20 @@ async def tail_file(filename: str, lines_count: int, follow: bool) -> None:
         while True:
             size = os.stat(filename).st_size
             if file_size < size:
-                async with await anyio.open_file(filename) as f:
+                async with await trio.open_file(filename) as f:
                     await f.seek(file_size)
                     async for line in f:
                         click.echo(line, nl=False)
 
                 file_size = size
             else:
-                await anyio.sleep(0.1)
+                await trio.sleep(0.1)
 
 
 async def main(filename: str, lines_count: int, follow: bool) -> None:
-    async with anyio.create_task_group() as tg:
-        tg.start_soon(function_runner, tg.cancel_scope, tail_file, filename, lines_count, follow)
-        tg.start_soon(signal_handler, tg.cancel_scope)
+    async with trio.open_nursery() as nursery:
+        nursery.start_soon(function_runner, nursery.cancel_scope, tail_file, filename, lines_count, follow)
+        nursery.start_soon(signal_handler, nursery.cancel_scope)
 
 
 @click.command()
