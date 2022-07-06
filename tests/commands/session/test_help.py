@@ -1,13 +1,13 @@
 import pytest
 from trio_websocket import serve_websocket
 
-from tests.helpers import get_fake_input, server_handler
+from tests.helpers import server_handler
 from ws.commands.session import main
 from ws.utils.command import Command
 
 
-async def test_should_print_general_help_and_exit_program(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help'))
+async def test_should_print_general_help_and_exit_program(capsys, nursery, mock_input):
+    mock_input.send_text('help\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
 
@@ -29,9 +29,9 @@ async def test_should_print_general_help_and_exit_program(capsys, mocker, nurser
     [('help ping bar', 'Unknown argument: bar\n'), ('help ping foo bar', 'Unknown arguments: foo bar\n')],
 )
 async def test_should_print_unknown_arguments_when_they_are_passed_to_help_sub_command(
-    capsys, mocker, nursery, input_data, message
+    capsys, nursery, mock_input, input_data, message
 ):
-    mocker.patch('ws.console.console.input', get_fake_input(input_data))
+    mock_input.send_text(f'{input_data}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -40,8 +40,8 @@ async def test_should_print_unknown_arguments_when_they_are_passed_to_help_sub_c
     assert 'Bye!' in output
 
 
-async def test_should_print_list_of_commands_when_unknown_command_is_passed_as_argument(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help foo'))
+async def test_should_print_list_of_commands_when_unknown_command_is_passed_as_argument(capsys, nursery, mock_input):
+    mock_input.send_text('help foo\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -52,8 +52,8 @@ async def test_should_print_list_of_commands_when_unknown_command_is_passed_as_a
             assert f'• {command.value}\n' in output
 
 
-async def test_should_print_ping_help_and_exit(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help ping'))
+async def test_should_print_ping_help_and_exit(capsys, nursery, mock_input):
+    mock_input.send_text('help ping\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -67,8 +67,8 @@ async def test_should_print_ping_help_and_exit(capsys, mocker, nursery):
     assert 'Bye!' in output
 
 
-async def test_should_print_pong_help_and_exit(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help pong'))
+async def test_should_print_pong_help_and_exit(capsys, nursery, mock_input):
+    mock_input.send_text('help pong\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -82,8 +82,8 @@ async def test_should_print_pong_help_and_exit(capsys, mocker, nursery):
     assert 'Bye!' in output
 
 
-async def test_should_print_quit_help_and_exit(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help quit'))
+async def test_should_print_quit_help_and_exit(capsys, nursery, mock_input):
+    mock_input.send_text('help quit\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -94,8 +94,8 @@ async def test_should_print_quit_help_and_exit(capsys, mocker, nursery):
     assert 'Bye!' in output
 
 
-async def test_should_print_close_help_and_exit(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help close'))
+async def test_should_print_close_help_and_exit(capsys, nursery, mock_input):
+    mock_input.send_text('help close\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -109,8 +109,8 @@ async def test_should_print_close_help_and_exit(capsys, mocker, nursery):
     assert 'Bye!' in output
 
 
-async def test_should_print_text_help_and_exit(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help text'))
+async def test_should_print_text_help_and_exit(capsys, nursery, mock_input):
+    mock_input.send_text('help text\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -125,8 +125,8 @@ async def test_should_print_text_help_and_exit(capsys, mocker, nursery):
     assert 'Bye!' in output
 
 
-async def test_should_print_byte_help_and_exit(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('help byte'))
+async def test_should_print_byte_help_and_exit(capsys, nursery, mock_input):
+    mock_input.send_text('help byte\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out

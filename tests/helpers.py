@@ -2,7 +2,6 @@
 import platform
 import signal
 import threading
-from typing import Callable
 
 import cffi
 import trio
@@ -35,17 +34,3 @@ async def server_handler(request) -> None:
             await ws.send_message(message)
         except trio_websocket.ConnectionClosed:
             break
-
-
-def get_fake_input(input_data: str) -> Callable[[str], str]:
-    count = 0
-
-    def fake_input(_prompt):
-        nonlocal count
-        if count == 0:
-            count += 1
-            return input_data
-        else:
-            return 'quit'
-
-    return fake_input

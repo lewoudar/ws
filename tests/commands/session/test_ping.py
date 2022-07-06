@@ -1,7 +1,7 @@
 import pytest
 from trio_websocket import serve_websocket
 
-from tests.helpers import get_fake_input, server_handler
+from tests.helpers import server_handler
 from ws.commands.session import main
 
 
@@ -10,9 +10,9 @@ from ws.commands.session import main
     [('ping foo bar', 'Unknown argument: bar\n'), ('ping foo bar tar', 'Unknown arguments: bar tar\n')],
 )
 async def test_should_print_unknown_arguments_when_they_are_passed_to_ping_sub_command(
-    capsys, mocker, nursery, input_data, message
+    capsys, nursery, mock_input, input_data, message
 ):
-    mocker.patch('ws.console.console.input', get_fake_input(input_data))
+    mock_input.send_text(f'{input_data}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -21,9 +21,9 @@ async def test_should_print_unknown_arguments_when_they_are_passed_to_ping_sub_c
     assert 'Bye!' in output
 
 
-async def test_should_print_timeout_message_and_exit_program(capsys, monkeypatch, mocker, nursery):
+async def test_should_print_timeout_message_and_exit_program(capsys, monkeypatch, nursery, mock_input):
     url = 'ws://localhost:1234'
-    mocker.patch('ws.console.console.input', get_fake_input('ping'))
+    mock_input.send_text('ping\nquit\n')
     # we set a very low response timeout and hope for timeout (I don't have a better idea)
     monkeypatch.setenv('ws_response_timeout', '0.0001')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
@@ -35,9 +35,9 @@ async def test_should_print_timeout_message_and_exit_program(capsys, monkeypatch
     assert 'Bye!' in output
 
 
-async def test_should_print_error_message_when_payload_length_exceeds_125(capsys, mocker, nursery):
+async def test_should_print_error_message_when_payload_length_exceeds_125(capsys, nursery, mock_input):
     payload = 'a' * 126
-    mocker.patch('ws.console.console.input', get_fake_input(f'ping {payload}'))
+    mock_input.send_text(f'ping {payload}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -50,9 +50,9 @@ async def test_should_print_error_message_when_payload_length_exceeds_125(capsys
 @pytest.mark.parametrize(
     ('input_data', 'length'), [('ping', 32), ('ping "hello world"', 11), ("ping 'hello world'", 11)]
 )
-async def test_should_print_success_message_when_pong_is_received(capsys, mocker, nursery, input_data, length):
+async def test_should_print_success_message_when_pong_is_received(capsys, nursery, mock_input, input_data, length):
     url = 'ws://localhost:1234'
-    mocker.patch('ws.console.console.input', get_fake_input(input_data))
+    mock_input.send_text(f'{input_data}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main(url)
     output = capsys.readouterr().out

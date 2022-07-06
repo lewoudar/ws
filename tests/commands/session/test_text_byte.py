@@ -3,7 +3,7 @@ import platform
 import pytest
 from trio_websocket import serve_websocket
 
-from tests.helpers import get_fake_input, server_handler
+from tests.helpers import server_handler
 from ws.commands.session import main
 
 
@@ -17,9 +17,9 @@ from ws.commands.session import main
     ],
 )
 async def test_should_print_unknown_arguments_when_they_are_passed_to_sub_command(
-    capsys, mocker, nursery, input_data, message
+    capsys, nursery, mock_input, input_data, message
 ):
-    mocker.patch('ws.console.console.input', get_fake_input(input_data))
+    mock_input.send_text(f'{input_data}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -29,8 +29,8 @@ async def test_should_print_unknown_arguments_when_they_are_passed_to_sub_comman
 
 
 @pytest.mark.parametrize('command', ['text', 'byte'])
-async def test_should_print_error_message_when_no_data_is_passed_to_sub_command(capsys, mocker, nursery, command):
-    mocker.patch('ws.console.console.input', get_fake_input(command))
+async def test_should_print_error_message_when_no_data_is_passed_to_sub_command(capsys, nursery, mock_input, command):
+    mock_input.send_text(f'{command}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -40,8 +40,8 @@ async def test_should_print_error_message_when_no_data_is_passed_to_sub_command(
 
 
 @pytest.mark.parametrize('command', ['text', 'byte'])
-async def test_should_print_error_when_given_file_does_not_exist(capsys, mocker, nursery, command):
-    mocker.patch('ws.console.console.input', get_fake_input(f'{command} file@foo.txt'))
+async def test_should_print_error_when_given_file_does_not_exist(capsys, nursery, mock_input, command):
+    mock_input.send_text(f'{command} file@foo.txt\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -51,8 +51,8 @@ async def test_should_print_error_when_given_file_does_not_exist(capsys, mocker,
 
 
 @pytest.mark.parametrize('command', ['text', 'byte'])
-async def test_should_send_raw_message_and_print_its_length(capsys, mocker, nursery, command):
-    mocker.patch('ws.console.console.input', get_fake_input(f'{command} "hello world"'))
+async def test_should_send_raw_message_and_print_its_length(capsys, nursery, mock_input, command):
+    mock_input.send_text(f'{command} "hello world"\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -66,10 +66,10 @@ async def test_should_send_raw_message_and_print_its_length(capsys, mocker, nurs
     platform.system() == 'Windows',
     reason='for an unknown reason, the temporary file is not created as expected on windows runner',
 )
-async def test_should_send_message_in_file_and_print_its_length(capsys, tmp_path, mocker, nursery, command):
+async def test_should_send_message_in_file_and_print_its_length(capsys, tmp_path, nursery, mock_input, command):
     file_path = tmp_path / 'file.txt'
     file_path.write_text('hello world')
-    mocker.patch('ws.console.console.input', get_fake_input(f'{command} file@{file_path}'))
+    mock_input.send_text(f'{command} file@{file_path}\nquit\n')
 
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')

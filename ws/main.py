@@ -5,7 +5,6 @@ from rich.traceback import install
 from .commands.completion import install_completion
 from .commands.echo_server import echo_server
 from .commands.listen import listen
-from .commands.new_session import new_session
 from .commands.ping import ping
 from .commands.pong import pong
 from .commands.session import session
@@ -23,5 +22,5 @@ def cli():
     """
 
 
-for command in [tail, ping, pong, echo_server, listen, byte, text, session, install_completion, new_session]:
+for command in [tail, ping, pong, echo_server, listen, byte, text, install_completion, session]:
     cli.add_command(command)
