@@ -79,12 +79,12 @@ async def interact(url: str, filename: str = None) -> None:
 
     console.print(INTRODUCTION)
     good_bye_message = '[info]Bye! :waving_hand:'
-    session = get_prompt_session()
+    prompt_session = get_prompt_session()
 
     async with websocket_client(url) as client:
         while True:
             try:
-                user_input = session.prompt()
+                user_input = prompt_session.prompt()
                 user_input = user_input.strip()
                 if not user_input:
                     continue
