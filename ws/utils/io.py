@@ -2,7 +2,6 @@ import io
 import signal
 from typing import Any, AsyncIterator, Callable
 
-import anyio
 import trio
 
 from ws.console import console
@@ -28,8 +27,8 @@ async def function_runner(scope: trio.CancelScope, function: Callable, *args: An
 # it is a good idea to read the file in byte mode, more information can be found
 # in the answers of this post: https://stackoverflow.com/a/23646049/7181806
 async def reverse_read_lines(file: str) -> AsyncIterator[bytes]:
-    async with await anyio.open_file(file, 'rb') as f:
-        await f.seek(0, whence=io.SEEK_END)
+    async with await trio.open_file(file, 'rb') as f:
+        await f.seek(0, io.SEEK_END)
         pointer = await f.tell()
         buffer = bytearray()
 

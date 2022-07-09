@@ -1,5 +1,16 @@
+from typing import Optional
+
 import click
 import trio
+from prompt_toolkit import PromptSession
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.completion import NestedCompleter
+from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit.input import Input
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.output import Output
+from prompt_toolkit.styles import Style, merge_styles, style_from_pygments_cls
+from pygments.styles import get_style_by_name
 
 from ws.client import websocket_client
 from ws.console import configure_console_recording, console, save_output
@@ -18,6 +29,46 @@ from ws.utils.command import (
 from ws.utils.decorators import catch_pydantic_error
 from ws.utils.documentation import INTRODUCTION
 from ws.utils.io import function_runner, signal_handler
+from ws.utils.lexer import WSLexer
+
+
+def get_prompt_session(input_: Optional[Input] = None, output: Optional[Output] = None) -> PromptSession:
+    style = merge_styles(
+        [
+            style_from_pygments_cls(get_style_by_name('monokai')),  # type: ignore
+            Style.from_dict(
+                {
+                    'pygments.keyword': 'skyblue',
+                    'completion-menu.completion': 'bg:#008888 #ffffff',
+                    'completion-menu.completion.current': 'bg:#00aaaa #000000',
+                    'scrollbar.background': 'bg:#88aaaa',
+                    'scrollbar.button': 'bg:#222222',
+                }
+            ),
+        ]
+    )
+    completer = NestedCompleter.from_nested_dict(
+        {
+            'help': {'ping', 'pong', 'close', 'quit', 'text', 'byte'},
+            'text': None,
+            'byte': None,
+            'close': None,
+            'quit': None,
+            'ping': None,
+            'pong': None,
+        }
+    )
+    prompt_message = FormattedText([('ansibrightcyan', '>'), ('', ' ')])
+    return PromptSession(
+        prompt_message,
+        lexer=PygmentsLexer(WSLexer),
+        style=style,
+        include_default_pygments_style=False,
+        completer=completer,
+        auto_suggest=AutoSuggestFromHistory(),
+        input=input_,
+        output=output,
+    )
 
 
 @catch_pydantic_error
@@ -28,10 +79,12 @@ async def interact(url: str, filename: str = None) -> None:
 
     console.print(INTRODUCTION)
     good_bye_message = '[info]Bye! :waving_hand:'
+    prompt_session = get_prompt_session()
+
     async with websocket_client(url) as client:
         while True:
             try:
-                user_input = console.input('[bold][prompt]>[/][/] ')
+                user_input = prompt_session.prompt()
                 user_input = user_input.strip()
                 if not user_input:
                     continue

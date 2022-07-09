@@ -3,7 +3,7 @@ import platform
 import pytest
 from trio_websocket import serve_websocket
 
-from tests.helpers import get_fake_input, server_handler
+from tests.helpers import server_handler
 from ws.commands.session import main
 from ws.main import cli
 from ws.utils.command import Command
@@ -23,9 +23,9 @@ def test_should_print_error_when_filename_is_not_a_file(tmp_path, runner):
     assert 'is a directory' in result.output
 
 
-async def test_should_exit_program_when_user_makes_a_ctrl_d(capsys, mocker, nursery):
-    # Ctrl+D raises an EOFError, so to simulate it, we will raise this error on console.input method
-    mocker.patch('ws.console.console.input', side_effect=EOFError)
+async def test_should_exit_program_when_user_makes_a_ctrl_d(capsys, nursery, mock_input):
+    # looking in prompt_toolkit tests, I discovered that '\x03' represents Ctrl+C and '\xO4' Ctrl+D, :o
+    mock_input.send_text('\x04')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -38,8 +38,8 @@ async def test_should_exit_program_when_user_makes_a_ctrl_d(capsys, mocker, nurs
     assert 'Bye! 👋\n' in output
 
 
-async def test_should_print_error_message_when_an_unknown_command_is_given_as_input(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('foo'))
+async def test_should_print_error_message_when_an_unknown_command_is_given_as_input(capsys, nursery, mock_input):
+    mock_input.send_text('foo\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -50,21 +50,8 @@ async def test_should_print_error_message_when_an_unknown_command_is_given_as_in
     assert 'Bye!' in output
 
 
-async def test_should_continue_prompting_user_if_input_is_empty(capsys, mocker, nursery):
-    count = 0
-
-    def fake_input(_prompt):
-        nonlocal count
-        if count == 0:
-            count += 1
-            return ''
-        elif count == 1:
-            count += 1
-            return '  '
-        else:
-            return 'quit'
-
-    mocker.patch('ws.console.console.input', fake_input)
+async def test_should_continue_prompting_user_if_input_is_empty(capsys, nursery, mock_input):
+    mock_input.send_text('\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -78,9 +65,9 @@ async def test_should_continue_prompting_user_if_input_is_empty(capsys, mocker, 
     platform.system() == 'Windows',
     reason='for an unknown reason, the temporary file is not created as expected on windows runner',
 )
-async def test_should_print_input_and_save_it_in_a_file(capsys, tmp_path, mocker, nursery, filename):
+async def test_should_print_input_and_save_it_in_a_file(capsys, tmp_path, nursery, mock_input, filename):
     file_path = tmp_path / filename
-    mocker.patch('ws.console.console.input', get_fake_input('help'))
+    mock_input.send_text('help\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234', filename=f'{file_path}')
     terminal_output = capsys.readouterr().out

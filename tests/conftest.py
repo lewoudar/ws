@@ -7,6 +7,9 @@ from typing import Callable
 import pytest
 import trustme
 from click.testing import CliRunner
+from prompt_toolkit.application import create_app_session
+from prompt_toolkit.input import PipeInput, create_pipe_input
+from prompt_toolkit.output import DummyOutput
 from rich.console import Console
 
 from ws.console import console, custom_theme
@@ -85,7 +88,7 @@ def private_key(tmp_path, server_cert) -> pathlib.Path:
 
 
 @pytest.fixture()
-def test_console():
+def test_console() -> Console:
     """A console designed for tests."""
     return Console(theme=custom_theme, file=io.StringIO())
 
@@ -97,3 +100,11 @@ def reset_console():
     yield
     console.record = False
     console.width = width
+
+
+@pytest.fixture()
+def mock_input() -> PipeInput:
+    """Mock input to interact with prompt_toolkit session."""
+    with create_pipe_input() as pipe_input:
+        with create_app_session(input=pipe_input, output=DummyOutput()):
+            yield pipe_input

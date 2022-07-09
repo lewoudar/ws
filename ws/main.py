@@ -22,5 +22,5 @@ def cli():
     """
 
 
-for command in [tail, ping, pong, echo_server, listen, byte, text, session, install_completion]:
+for command in [tail, ping, pong, echo_server, listen, byte, text, install_completion, session]:
     cli.add_command(command)

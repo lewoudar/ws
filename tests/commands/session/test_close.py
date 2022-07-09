@@ -1,7 +1,7 @@
 import pytest
 from trio_websocket import serve_websocket
 
-from tests.helpers import get_fake_input, server_handler
+from tests.helpers import server_handler
 from ws.commands.session import main
 
 
@@ -13,9 +13,9 @@ from ws.commands.session import main
     ],
 )
 async def test_should_print_unknown_arguments_when_they_are_passed_to_close_sub_command(
-    capsys, mocker, nursery, input_data, message
+    capsys, nursery, mock_input, input_data, message
 ):
-    mocker.patch('ws.console.console.input', get_fake_input(input_data))
+    mock_input.send_text(f'{input_data}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -24,8 +24,8 @@ async def test_should_print_unknown_arguments_when_they_are_passed_to_close_sub_
     assert 'Bye!' in output
 
 
-async def test_should_print_error_message_when_code_is_not_an_integer(capsys, mocker, nursery):
-    mocker.patch('ws.console.console.input', get_fake_input('close foo reason'))
+async def test_should_print_error_message_when_code_is_not_an_integer(capsys, nursery, mock_input):
+    mock_input.send_text('close foo reason\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -35,8 +35,8 @@ async def test_should_print_error_message_when_code_is_not_an_integer(capsys, mo
 
 
 @pytest.mark.parametrize('code', [-1, 5000])
-async def test_should_print_error_message_when_code_is_not_valid_range(capsys, mocker, nursery, code):
-    mocker.patch('ws.console.console.input', get_fake_input(f'close {code} reason'))
+async def test_should_print_error_message_when_code_is_not_valid_range(capsys, nursery, mock_input, code):
+    mock_input.send_text(f'close {code} reason\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -45,9 +45,9 @@ async def test_should_print_error_message_when_code_is_not_valid_range(capsys, m
     assert 'Bye!' in output
 
 
-async def test_should_print_error_message_when_reason_length_exceeds_123(capsys, mocker, nursery):
+async def test_should_print_error_message_when_reason_length_exceeds_123(capsys, nursery, mock_input):
     reason = 'a' * 124
-    mocker.patch('ws.console.console.input', get_fake_input(f'close 1000 {reason}'))
+    mock_input.send_text(f'close 1000 {reason}\nquit\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out
@@ -57,8 +57,8 @@ async def test_should_print_error_message_when_reason_length_exceeds_123(capsys,
 
 
 @pytest.mark.parametrize('input_data', ['1002', '1002 reason'])
-async def test_should_close_client_and_exit(capsys, mocker, nursery, input_data):
-    mocker.patch('ws.console.console.input', get_fake_input(f'close {input_data}'))
+async def test_should_close_client_and_exit(capsys, nursery, mock_input, input_data):
+    mock_input.send_text(f'close {input_data}\n')
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')
     output = capsys.readouterr().out

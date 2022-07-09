@@ -23,7 +23,7 @@ repos:
         name: bandit
         entry: poetry run bandit -r ws
         language: system
-        exclude: ^tests/
+        exclude: ^tests
         types:
           - python
       - id: flake8
