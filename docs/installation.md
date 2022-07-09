@@ -35,6 +35,17 @@ Usage: ws [OPTIONS] COMMAND [ARGS]...
 
   A convenient websocket cli.
 
+  Example usage:
+
+  # listens incoming messages from endpoint ws://localhost:8000/path
+  $ ws listen ws://localhost:8000/path
+
+  # sends text "hello world" in a text frame
+  $ ws text wss://ws.postman-echo.com/raw "hello world"
+
+  # sends the content from json file "hello.json" in a binary frame
+  $ ws byte wss://ws.postman-echo.com/raw file@hello.json
+
 Options:
   --version   Show the version and exit.
   -h, --help  Show this message and exit.

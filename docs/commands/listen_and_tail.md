@@ -9,7 +9,7 @@ Usage: ws listen [OPTIONS] URL
   Listens messages on a given URL.
 
 Options:
-  -j, --json
+  -j, --json                  Pretty print json messages.
   -d, --duration FLOAT RANGE  Time to run the program in seconds.  [x>0]
   -f, --file FILE             File to store the output. The file extension
                               determines the type of file will be created. A

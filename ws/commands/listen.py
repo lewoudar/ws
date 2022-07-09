@@ -68,7 +68,7 @@ async def main(url: str, is_json: bool, duration: float = None, filename: str = 
 
 @click.command()
 @url_argument
-@click.option('-j', '--json', 'is_json', is_flag=True)
+@click.option('-j', '--json', 'is_json', is_flag=True, help='Pretty print json messages.')
 @duration_option
 @filename_option
 def listen(url: str, is_json: bool, duration: float, filename: str):
