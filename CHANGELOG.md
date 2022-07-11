@@ -5,7 +5,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-07-11
+
+### Added
+
+- Syntax highlighting in session command.
+- Autocompletion of session subcommands.
+- Ability to read history of previous commands typed in the current session.
+- Auto-suggestion of commands based on your history within the current session.
+
 ## [0.1.0] - 2022-05-29
 
 ### Added
+
 - First release of the package.
