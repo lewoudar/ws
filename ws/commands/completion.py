@@ -1,12 +1,87 @@
+from __future__ import annotations
+
+import os
 import subprocess  # nosec
 from pathlib import Path
 
 import click
 import shellingham
+from click.shell_completion import ShellComplete, add_completion_class
+from typing_extensions import Literal
 
 from ws.console import console
 
-SHELLS = ['bash', 'zsh', 'fish']
+SHELLS = ['bash', 'zsh', 'fish', 'powershell', 'pwsh']
+
+# Windows support code is heavily inspired by the typer project
+POWERSHELL_COMPLETION_SCRIPT = """
+Import-Module PSReadLine
+Set-PSReadLineKeyHandler -Chord Tab -Function MenuComplete
+$scriptblock = {
+    param($wordToComplete, $commandAst, $cursorPosition)
+    $Env:%(complete_var)s = "complete_powershell"
+    $Env:_CLICK_COMPLETE_ARGS = $commandAst.ToString()
+    $Env:_CLICK_COMPLETE_WORD_TO_COMPLETE = $wordToComplete
+    %(prog_name)s | ForEach-Object {
+        $commandArray = $_ -Split ":::"
+        $command = $commandArray[0]
+        $helpString = $commandArray[1]
+        [System.Management.Automation.CompletionResult]::new(
+            $command, $command, 'ParameterValue', $helpString)
+    }
+    $Env:%(complete_var)s = ""
+    $Env:_CLICK_COMPLETE_ARGS = ""
+    $Env:_CLICK_COMPLETE_WORD_TO_COMPLETE = ""
+}
+Register-ArgumentCompleter -Native -CommandName %(prog_name)s -ScriptBlock $scriptblock
+"""
+
+
+class PowerShellComplete(ShellComplete):
+    name = 'powershell'
+    source_template = POWERSHELL_COMPLETION_SCRIPT
+
+    def get_completion_args(self) -> tuple[list[str], str]:  # pragma: nocover
+        completion_args = os.getenv('_CLICK_COMPLETE_ARGS', '')
+        incomplete = os.getenv('_CLICK_COMPLETE_WORD_TO_COMPLETE', '')
+        cwords = click.parser.split_arg_string(completion_args)
+        args = cwords[1:]
+        return args, incomplete
+
+    def format_completion(self, item: click.shell_completion.CompletionItem) -> str:  # pragma: nocover
+        return f'{item.value}:::{item.help or " "}'
+
+
+class PowerCoreComplete(PowerShellComplete):
+    name = 'pwsh'
+
+
+add_completion_class(PowerShellComplete)
+add_completion_class(PowerCoreComplete)
+
+
+def install_powershell(shell: Literal['powershell', 'pwsh']):
+    # Ok I will explain what I have understood from the algorith I took my inspiration from
+    # we try to set an execution policy suitable for the current user
+    subprocess.run([shell, '-Command', 'Set-ExecutionPolicy', 'Unrestricted', '-Scope', 'CurrentUser'])  # nosec
+
+    # we get the powershell user profile file where we will store the completion script
+    try:
+        result = subprocess.run(  # nosec
+            [shell, '-NoProfile', '-Command', 'echo', '$profile'], check=True, capture_output=True
+        )
+    except subprocess.CalledProcessError:
+        console.print('[error]Unable to get PowerShell user profile')
+        raise SystemExit(1)
+
+    user_profile = result.stdout.decode()
+    user_profile_path = Path(user_profile.strip())
+    parent_path = user_profile_path.parent
+    # we make sure parents directories exist
+    parent_path.mkdir(parents=True, exist_ok=True)
+    completion_script = POWERSHELL_COMPLETION_SCRIPT % {'prog_name': 'ws', 'complete_var': '_WS_COMPLETE'}
+    with open(user_profile_path, 'a') as f:
+        f.write(f'{completion_script.strip()}\n')
 
 
 def install_bash_zsh(bash: bool = True) -> None:
@@ -60,6 +135,8 @@ def _install_completion(shell: str) -> None:
         install_bash_zsh()
     elif shell == 'zsh':
         install_bash_zsh(bash=False)
+    elif shell in ('powershell', 'pwsh'):
+        install_powershell(shell)  # type: ignore
     else:
         install_fish()
 

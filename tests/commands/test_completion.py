@@ -5,8 +5,47 @@ import subprocess
 import pytest
 import shellingham
 
-from ws.commands.completion import SHELLS
+from ws.commands.completion import SHELLS, install_powershell
 from ws.main import cli
+
+
+class TestInstallPowershell:
+    """Tests function install_powershell"""
+
+    @pytest.mark.parametrize('shell', ['powershell', 'pwsh'])
+    def test_should_print_error_when_unable_to_get_path_to_completion_script(self, capsys, mocker, shell):
+        def fake_subprocess_run(command_args, *_, **_k):
+            if command_args[1] != '-NoProfile':
+                return
+            raise subprocess.CalledProcessError(returncode=1, cmd='pwsh')
+
+        with pytest.raises(SystemExit):
+            mocker.patch('subprocess.run', side_effect=fake_subprocess_run)
+            install_powershell(shell)  # type: ignore
+
+    @pytest.mark.parametrize('shell', ['powershell', 'pwsh'])
+    def test_should_create_or_update_user_profile(self, tmp_path, mocker, shell):
+        user_profile_path = tmp_path / 'WindowsPowerShell' / 'Microsoft.PowerShell_profile.ps1'
+
+        def fake_subprocess_run(command_args, *_, **_k):
+            if command_args[1] == '-NoProfile':
+                return subprocess.CompletedProcess(command_args, 0, bytes(user_profile_path), None)
+
+        mocker.patch(
+            'shellingham.detect_shell',
+            return_value=(shell, f'C:\\Windows\\System32\\WindowsPowershell\\v1.0\\{shell}.exe'),
+        )
+        mocker.patch('subprocess.run', side_effect=fake_subprocess_run)
+        install_powershell(shell)  # type: ignore
+
+        # check user profile file
+        assert user_profile_path.is_file()
+
+        content = user_profile_path.read_text()
+        assert content.startswith('Import-Module PSReadLine')
+        assert '$Env:_WS_COMPLETE = "complete_powershell"' in content
+        assert 'ws | ForEach-Object {' in content
+        assert content.endswith('Register-ArgumentCompleter -Native -CommandName ws -ScriptBlock $scriptblock\n')
 
 
 def test_should_print_error_when_shell_is_not_detected(mocker, runner):
@@ -27,12 +66,13 @@ def test_should_print_error_when_os_name_is_unknown(monkeypatch, runner):
 
 
 def test_should_print_error_if_shell_is_not_supported(mocker, runner):
-    mocker.patch('shellingham.detect_shell', return_value=('pwsh', 'C:\\bin\\pwsh'))
+    mocker.patch('shellingham.detect_shell', return_value=('cmd', 'C:\\bin\\cmd.exe'))
     result = runner.invoke(cli, ['install-completion'])
 
     assert result.exit_code == 1
-    shells_string = ', '.join(SHELLS)
-    assert f'Your shell is not supported. Shells supported are: {shells_string}\n' == result.output
+    shells_string = ', '.join(SHELLS[:-1])
+    assert f'Your shell is not supported. Shells supported are: {shells_string}' in result.output
+    assert result.output.endswith('pwsh\n')
 
 
 @pytest.mark.parametrize('shell', [('bash', '/bin/bash'), ('zsh', '/bin/zsh'), ('fish', '/bin/fish')])
@@ -116,3 +156,27 @@ def test_should_create_completion_file_and_install_it_for_fish_shell(tmp_path, m
     content = completion_file.read_text()
     assert content.startswith('function _ws_completion')
     assert content.endswith('"(_ws_completion)";\n\n')
+
+
+@pytest.mark.skipif(platform.system() in ['Darwin', 'Linux'], reason='powershell is not supported on these OS')
+@pytest.mark.parametrize('shell', ['powershell', 'pwsh'])
+def test_should_create_completion_script_and_add_it_in_powershell_profile(tmp_path, mocker, runner, shell):
+    user_profile_path = tmp_path / 'WindowsPowerShell' / 'Microsoft.PowerShell_profile.ps1'
+
+    def fake_subprocess_run(command_args, *_, **_k):
+        if command_args[1] == '-NoProfile':
+            return subprocess.CompletedProcess(command_args, 0, bytes(user_profile_path), None)
+
+    mocker.patch('subprocess.run', side_effect=fake_subprocess_run)
+
+    result = runner.invoke(cli, ['install-completion'])
+
+    assert result.exit_code == 0
+    assert 'Successfully installed completion script!\n' in result.output
+
+    # check user profile file
+    assert user_profile_path.is_file()
+
+    content = user_profile_path.read_text()
+    assert content.startswith('Import-Module PSReadLine')
+    assert content.endswith('Register-ArgumentCompleter -Native -CommandName ws -ScriptBlock $scriptblock\n')

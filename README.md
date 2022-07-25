@@ -42,6 +42,7 @@ ws starts working from **python3.7** and also supports **pypy3**. It has the fol
 - [click-didyoumean](https://pypi.org/project/click-didyoumean/) for command suggestions in case of typos.
 - [rich](https://rich.readthedocs.io/en/latest/) for beautiful output display.
 - [shellingham](https://pypi.org/project/shellingham/) to detect the shell used.
+- [prompt_toolkit](https://python-prompt-toolkit.readthedocs.io/en/master/) for interactive command line.
 
 ## Usage
 
