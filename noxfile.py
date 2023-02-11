@@ -13,7 +13,8 @@ CI_ENVIRONMENT = 'GITHUB_ACTIONS' in os.environ
 def lint(session):
     """Performs pep8 and security checks."""
     source_code = 'ws'
-    session.install('flake8==3.9.2', 'bandit==1.7.4', 'black==23.1.0')
+    session.install('poetry>=1.0.0,<1.4.0')
+    session.run('poetry', 'install', '--only', 'lint')
     session.run('flake8', source_code)
     session.run('bandit', '-r', source_code)
     session.run('black', source_code, 'tests', '--check')
@@ -22,23 +23,24 @@ def lint(session):
 @nox.session(python=PYTHON_VERSIONS[-1])
 def safety(session):
     """Checks vulnerabilities of the installed packages."""
-    session.install('poetry>=1.0.0,<1.3.0')
-    session.run('poetry', 'install')
+    session.install('poetry>=1.0.0,<1.4.0')
+    session.run('poetry', 'install', '--only', 'security')
     session.run('safety', 'check')
 
 
 @nox.session(python=PYTHON_VERSIONS)
 def tests(session):
     """Runs the test suite."""
-    session.install('poetry>=1.0.0,<1.3.0')
-    session.run('poetry', 'install')
+    session.install('poetry>=1.0.0,<1.4.0')
+    session.run('poetry', 'install', '--with', 'test')
     session.run('pytest')
 
 
 @nox.session(python=PYTHON_VERSIONS[-1])
 def docs(session):
     """Builds the documentation."""
-    session.install('mkdocs==1.0.4')
+    session.install('poetry>=1.0.0,<1.4.0')
+    session.run('poetry', 'install', '--only', 'docs')
     session.run('mkdocs', 'build', '--clean')
 
 
@@ -50,7 +52,7 @@ def deploy(session):
     if 'POETRY_PYPI_TOKEN_PYPI' not in os.environ:
         session.error('you must specify your pypi token api to deploy your package')
 
-    session.install('poetry>=1.0.0,<1.3.0')
+    session.install('poetry>=1.0.0,<1.4.0')
     session.run('poetry', 'publish', '--build')
 
 
