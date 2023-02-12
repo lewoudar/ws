@@ -44,7 +44,7 @@ def docs(session):
     session.run('mkdocs', 'build', '--clean')
 
 
-@nox.session(python=False)
+@nox.session(python=PYTHON_VERSIONS[-1])
 def deploy(session):
     """
     Deploys on pypi.
