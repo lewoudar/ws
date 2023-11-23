@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Optional, Union, List, Tuple
+from typing import List, Optional, Tuple, Union
 
 import dotenv
 import tomli

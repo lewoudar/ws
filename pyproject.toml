@@ -86,7 +86,7 @@ extend-select = [
   "C90", # McCabe complexity
   "RUF"
 ]
-ignore = ["RUF012", "UP007"]
+ignore = ["RUF012", "UP007", "UP006"]
 
 [tool.ruff.format]
 quote-style = "single"
