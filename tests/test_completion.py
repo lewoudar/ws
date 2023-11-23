@@ -92,7 +92,8 @@ def test_should_create_completion_file_and_install_it_for_zsh_shell(tmp_path, mo
     content = completion_file.read_text()
 
     assert content.startswith('#compdef ws')
-    assert content.endswith('compdef _ws_completion ws;\n\n')
+    assert content.endswith('compdef _ws_completion ws\nfi\n\n')
+
 
     # .zshrc check
     lines = [line for line in zshrc_file.read_text().split('\n') if line]
