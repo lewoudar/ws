@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, List, Tuple
 
 import dotenv
 import tomli
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     response_timeout: float = Field(5.0, gt=0)
     message_queue_size: int = Field(1, ge=0)
     max_message_size: int = Field(1024 * 1024, gt=0)
-    extra_headers: Optional[list[tuple[str, str]]] = None
+    extra_headers: Optional[List[Tuple[str, str]]] = None
     terminal_width: int = Field(Console().width, gt=0)
     tls_ca_file: Optional[FilePath] = None
     tls_certificate_file: Optional[FilePath] = None
