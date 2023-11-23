@@ -1,4 +1,5 @@
 import pathlib
+from typing import Optional
 
 from rich.console import Console
 from rich.style import Style
@@ -20,7 +21,7 @@ custom_theme = Theme(data)
 console = Console(theme=custom_theme)
 
 
-def configure_console_recording(terminal: Console, settings: Settings, filename: str = None) -> None:
+def configure_console_recording(terminal: Console, settings: Settings, filename: Optional[str] = None) -> None:
     if filename is not None:
         terminal.record = True
     terminal.width = settings.terminal_width

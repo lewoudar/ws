@@ -141,10 +141,10 @@ class TestClient:
                 nursery.start_soon(self.worker, url)
 
         expected = (
-            f"Connection was rejected by {url}\n"
-            f"status code = {status_code}\n"
-            f"headers = {expected_headers}\n"
-            f"body = {body.decode()}\n"
+            f'Connection was rejected by {url}\n'
+            f'status code = {status_code}\n'
+            f'headers = {expected_headers}\n'
+            f'body = {body.decode()}\n'
         )
 
         assert capsys.readouterr().out == expected

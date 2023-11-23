@@ -15,7 +15,7 @@ def catch_too_slow_error(func: FuncCallable) -> FuncCallable:
             await func(*args, **kwargs)
         except trio.TooSlowError:
             console.print('[error]Unable to get response on time')
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     return wrapper
 
@@ -26,6 +26,6 @@ def catch_pydantic_error(func: FuncCallable) -> FuncCallable:
             await func(*args, **kwargs)
         except pydantic.ValidationError as e:
             console.print(f'[error]{e}')
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     return wrapper

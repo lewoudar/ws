@@ -1,6 +1,6 @@
 import io
 import signal
-from typing import Any, AsyncIterator, Callable
+from typing import Any, AsyncIterator, Callable, Optional
 
 import trio
 
@@ -50,7 +50,7 @@ async def reverse_read_lines(file: str) -> AsyncIterator[bytes]:
             yield buffer[::-1]
 
 
-async def sleep_until(cancel_scope: trio.CancelScope, duration: float = None) -> None:
+async def sleep_until(cancel_scope: trio.CancelScope, duration: Optional[float] = None) -> None:
     if duration is None:
         await trio.sleep_forever()
     else:

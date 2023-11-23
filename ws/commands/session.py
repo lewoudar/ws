@@ -1,3 +1,4 @@
+# ruff: noqa: C901
 from typing import Optional
 
 import click
@@ -72,7 +73,7 @@ def get_prompt_session(input_: Optional[Input] = None, output: Optional[Output] 
 
 
 @catch_pydantic_error
-async def interact(url: str, filename: str = None) -> None:
+async def interact(url: str, filename: Optional[str] = None) -> None:
     settings = get_settings()
     if filename:
         configure_console_recording(console, settings, filename)
@@ -82,6 +83,7 @@ async def interact(url: str, filename: str = None) -> None:
     prompt_session = get_prompt_session()
 
     async with websocket_client(url) as client:
+        # TODO: see how to simplify this code. Mccabe score is 13. The limit is 10 by default.
         while True:
             try:
                 user_input = prompt_session.prompt()
@@ -123,7 +125,7 @@ async def interact(url: str, filename: str = None) -> None:
                 break
 
 
-async def main(url: str, filename: str = None) -> None:
+async def main(url: str, filename: Optional[str] = None) -> None:
     async with trio.open_nursery() as nursery:
         nursery.start_soon(function_runner, nursery.cancel_scope, interact, url, filename)
         nursery.start_soon(signal_handler, nursery.cancel_scope)

@@ -1,3 +1,4 @@
+# ruff: noqa: S602
 import subprocess  # nosec
 from pathlib import Path
 
@@ -28,7 +29,7 @@ def install_bash_zsh(bash: bool = True) -> None:
         result = subprocess.run(command, shell=True, capture_output=True, check=True)  # nosec
     except subprocess.CalledProcessError:
         console.print('[error]Unable to get completion script for ws cli.')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     completion_script = completion_dir / f'ws-complete.{shell}'
     completion_script.write_text(result.stdout.decode())
@@ -49,7 +50,7 @@ def install_fish() -> None:
         result = subprocess.run(command, shell=True, capture_output=True, check=True)  # nosec
     except subprocess.CalledProcessError:
         console.print('[error]Unable to get completion script for ws cli.')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     completion_script = completion_dir / 'ws.fish'
     completion_script.write_text(result.stdout.decode())
@@ -74,14 +75,14 @@ def install_completion():
         shell, _ = shellingham.detect_shell()
     except shellingham.ShellDetectionFailure:
         console.print('[error]Unable to detect the current shell.')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     except RuntimeError as e:
         click.echo(f'[error]{e}')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     if shell not in SHELLS:
         console.print(f'[error]Your shell is not supported. Shells supported are: {", ".join(SHELLS)}')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     _install_completion(shell)
     console.print('[success]Successfully installed completion script!')

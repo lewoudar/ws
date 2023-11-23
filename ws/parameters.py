@@ -40,9 +40,9 @@ def get_normalized_message(message: str, is_bytes: bool) -> AnyStr:
             with open(file, mode) as f:
                 return f.read()
         except FileNotFoundError:
-            raise click.BadParameter(f'file {file} does not exist')
+            raise click.BadParameter(f'file {file} does not exist') from None
         except OSError:
-            raise click.BadParameter(f'file {file} cannot be opened')
+            raise click.BadParameter(f'file {file} cannot be opened') from None
     else:
         return message.encode() if is_bytes else message
 
@@ -50,7 +50,7 @@ def get_normalized_message(message: str, is_bytes: bool) -> AnyStr:
 class ByteParamType(click.ParamType):
     name = 'bytes'
 
-    def __init__(self, max_length: int = None):
+    def __init__(self, max_length: Optional[int] = None):
         self._max_length = max_length
 
     def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> bytes:
@@ -66,7 +66,7 @@ class ByteParamType(click.ParamType):
 class TextParamType(click.ParamType):
     name = 'text'
 
-    def __init__(self, max_length: int = None):
+    def __init__(self, max_length: Optional[int] = None):
         self._max_length = max_length
 
     def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> str:

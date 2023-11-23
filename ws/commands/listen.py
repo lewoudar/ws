@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import AnyStr
+from typing import AnyStr, Optional
 
 import click
 import trio
@@ -41,7 +41,7 @@ def print_json(terminal: Console, message: AnyStr, is_bytes: bool) -> None:
         terminal.print(escape(message))
 
 
-async def listen_messages(url: str, is_json: bool, filename: str = None) -> None:
+async def listen_messages(url: str, is_json: bool, filename: Optional[str] = None) -> None:
     configure_console_recording(console, get_settings(), filename)
 
     async with websocket_client(url) as client:
@@ -56,7 +56,7 @@ async def listen_messages(url: str, is_json: bool, filename: str = None) -> None
                 print_message(console, message, is_bytes)
 
 
-async def main(url: str, is_json: bool, duration: float = None, filename: str = None) -> None:
+async def main(url: str, is_json: bool, duration: Optional[float] = None, filename: Optional[str] = None) -> None:
     async with trio.open_nursery() as nursery:
         nursery.start_soon(function_runner, nursery.cancel_scope, listen_messages, url, is_json, filename)
         nursery.start_soon(signal_handler, nursery.cancel_scope)

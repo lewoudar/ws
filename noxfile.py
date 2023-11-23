@@ -5,7 +5,7 @@ import nox
 
 nox.options.reuse_existing_virtualenvs = True
 
-PYTHON_VERSIONS = ['pypy3', '3.7', '3.8', '3.9', '3.10', '3.11']
+PYTHON_VERSIONS = ['pypy3', '3.8', '3.9', '3.10', '3.11', '3.12']
 CI_ENVIRONMENT = 'GITHUB_ACTIONS' in os.environ
 
 
@@ -13,11 +13,10 @@ CI_ENVIRONMENT = 'GITHUB_ACTIONS' in os.environ
 def lint(session):
     """Performs pep8 and security checks."""
     source_code = 'ws'
-    session.install('poetry>=1.0.0,<1.4.0')
+    session.install('poetry>=1.0.0,<1.5.0')
     session.run('poetry', 'install', '--only', 'lint')
-    session.run('flake8', source_code)
+    session.run('ruff', 'check', source_code)
     session.run('bandit', '-r', source_code)
-    session.run('black', source_code, 'tests', '--check')
 
 
 @nox.session(python=PYTHON_VERSIONS[-1])
@@ -31,7 +30,7 @@ def safety(session):
 @nox.session(python=PYTHON_VERSIONS)
 def tests(session):
     """Runs the test suite."""
-    session.install('poetry>=1.0.0,<1.4.0')
+    session.install('poetry>=1.0.0,<1.5.0')
     session.run('poetry', 'install', '--with', 'test')
     session.run('pytest')
 
@@ -39,7 +38,7 @@ def tests(session):
 @nox.session(python=PYTHON_VERSIONS[-1])
 def docs(session):
     """Builds the documentation."""
-    session.install('poetry>=1.0.0,<1.4.0')
+    session.install('poetry>=1.0.0,<1.5.0')
     session.run('poetry', 'install', '--only', 'docs')
     session.run('mkdocs', 'build', '--clean')
 
@@ -52,7 +51,7 @@ def deploy(session):
     if 'POETRY_PYPI_TOKEN_PYPI' not in os.environ:
         session.error('you must specify your pypi token api to deploy your package')
 
-    session.install('poetry>=1.0.0,<1.4.0')
+    session.install('poetry>=1.0.0,<1.5.0')
     session.run('poetry', 'publish', '--build')
 
 

@@ -17,7 +17,10 @@ from ws.settings import get_settings
 
 
 def get_client_ssl_context(
-    ca_file: str = None, certificate: str = None, keyfile: str = None, password: str = None
+    ca_file: Optional[str] = None,
+        certificate: Optional[str] = None,
+        keyfile: Optional[str] = None,
+        password: Optional[str] = None
 ) -> Optional[ssl.SSLContext]:
     context = None
     if ca_file:
@@ -27,7 +30,7 @@ def get_client_ssl_context(
             context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=str(ca_file))
         except ssl.SSLError:
             console.print(f'[error]Unable to load certificate(s) located in the (tls_ca_file) file {ca_file}')
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     # TODO: If someone one day is unhappy by the fact that I load a CA bundle certificate from certifi
     #  It is a good idea to look httpx default context implementation. It creates a context that can work
@@ -49,16 +52,16 @@ def get_client_ssl_context(
                 'Please check tls_certificate_file and eventually tls_key_file and tls_password'
             )
             console.print(f'[error]{message}')
-            raise SystemExit(1)
+            raise SystemExit(1) from None
         return context
 
     if keyfile:
         console.print('[error]You provided tls_key_file without tls_certificate_file')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     if password:
         console.print('[error]You provided tls_password without tls_key_file and tls_certificate_file')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     return context
 
@@ -69,7 +72,7 @@ async def websocket_client(url: str) -> WebSocketConnection:
         settings = get_settings()
     except pydantic.ValidationError as e:
         console.print(f'[error]{e}')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
 
     arguments = {
         'connect_timeout': settings.connect_timeout,
@@ -90,10 +93,10 @@ async def websocket_client(url: str) -> WebSocketConnection:
             yield ws
     except ConnectionTimeout:
         console.print(f'[error]Unable to connect to {url}')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     except DisconnectionTimeout:
         console.print(f'[error]Unable to disconnect on time from {url}')
-        raise SystemExit(1)
+        raise SystemExit(1) from None
     except ConnectionRejected as e:
         console.print(f'[error]Connection was rejected by {url}')
         console.print(f'[label]status code[/] = [info]{e.status_code}[/]')
@@ -101,4 +104,4 @@ async def websocket_client(url: str) -> WebSocketConnection:
         console.print(f'[label]headers[/] = {headers}')
         console.print(f'[label]body[/] = [info]{e.body.decode()}[/]')
 
-        raise SystemExit(1)
+        raise SystemExit(1) from None
