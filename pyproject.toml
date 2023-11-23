@@ -29,7 +29,7 @@ packages = [
 "Changelog" = "https://github.com/lewoudar/ws/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 trio-websocket = "^0.11.1"
 rich = "^13.7.0"
 pydantic = "^1.9.0"
