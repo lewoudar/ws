@@ -22,7 +22,7 @@ def lint(session):
 @nox.session(python=PYTHON_VERSIONS[-1])
 def safety(session):
     """Checks vulnerabilities of the installed packages."""
-    session.install('poetry>=1.0.0,<1.4.0')
+    session.install('poetry>=1.0.0,<1.5.0')
     session.run('poetry', 'install', '--only', 'security')
     session.run('safety', 'check')
 
