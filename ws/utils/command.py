@@ -5,6 +5,7 @@ from typing import List, Sequence
 import click
 import trio
 from click.parser import split_arg_string
+from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 from rich.console import Console
 from rich.markdown import Markdown
@@ -22,11 +23,7 @@ class CommandHelper:
     args: List[str]
 
 
-class CustomConfig:
-    arbitrary_types_allowed = True
-
-
-@dataclass(frozen=True, config=CustomConfig)
+@dataclass(frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
 class NamespaceData:
     obj: argparse.Namespace
     unknown_arguments: List[str]

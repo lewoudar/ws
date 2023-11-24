@@ -3,16 +3,12 @@ import re
 from typing import AnyStr, Optional, Union
 
 import click
-from pydantic import AnyUrl, BaseModel, ValidationError
-from typing_extensions import Literal
-
-
-class WsUrl(AnyUrl):
-    allowed_schemes = {'ws', 'wss'}
+from pydantic import AnyUrl, BaseModel, UrlConstraints, ValidationError
+from typing_extensions import Annotated, Literal
 
 
 class WsUrlModel(BaseModel):
-    url: WsUrl
+    url: Annotated[AnyUrl, UrlConstraints(allowed_schemes=['ws', 'wss'])]
 
 
 class HostModel(BaseModel):
@@ -26,8 +22,10 @@ class WsUrlParamType(click.ParamType):
         if re.match(r':\d+$', value):
             value = f'ws://localhost{value}'
         try:
-            WsUrlModel(url=value)
-            return value
+            model = WsUrlModel(url=value)
+            # we return the normalized url. For example if a user passes "ws:/foo.com" which is not normally valid
+            # Pydantic will convert it to "ws://foo.com/" which is valid.
+            return str(model.url)
         except ValidationError:
             self.fail(f'{value} is not a valid websocket url', param, ctx)
 
@@ -40,9 +38,9 @@ def get_normalized_message(message: str, is_bytes: bool) -> AnyStr:
             with open(file, mode) as f:
                 return f.read()
         except FileNotFoundError:
-            raise click.BadParameter(f'file {file} does not exist')
+            raise click.BadParameter(f'file {file} does not exist') from None
         except OSError:
-            raise click.BadParameter(f'file {file} cannot be opened')
+            raise click.BadParameter(f'file {file} cannot be opened') from None
     else:
         return message.encode() if is_bytes else message
 
@@ -50,7 +48,7 @@ def get_normalized_message(message: str, is_bytes: bool) -> AnyStr:
 class ByteParamType(click.ParamType):
     name = 'bytes'
 
-    def __init__(self, max_length: int = None):
+    def __init__(self, max_length: Optional[int] = None):
         self._max_length = max_length
 
     def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> bytes:
@@ -66,7 +64,7 @@ class ByteParamType(click.ParamType):
 class TextParamType(click.ParamType):
     name = 'text'
 
-    def __init__(self, max_length: int = None):
+    def __init__(self, max_length: Optional[int] = None):
         self._max_length = max_length
 
     def convert(self, value: str, param: Optional[click.Parameter], ctx: Optional[click.Context]) -> str:

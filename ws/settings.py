@@ -4,15 +4,16 @@ import math
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-import dotenv
 import tomli
-from pydantic import BaseSettings, Field, FilePath, validator
+from pydantic import Field, FilePath, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from rich.console import Console
 
 ENV_FILE = '.ws.env'
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix='ws_')
     connect_timeout: float = Field(5.0, gt=0)
     disconnect_timeout: float = Field(5.0, gt=0)
     response_timeout: float = Field(5.0, gt=0)
@@ -25,14 +26,12 @@ class Settings(BaseSettings):
     tls_key_file: Optional[FilePath] = None
     tls_password: Optional[str] = None
 
-    @validator('response_timeout', pre=True)
+    @field_validator('response_timeout', mode='before')
+    @classmethod
     def check_response_timeout(cls, value):
         if isinstance(value, str) and value.lower() == 'inf':
             return math.inf
         return value
-
-    class Config:
-        env_prefix = 'ws_'
 
 
 def get_config_from_toml(filename: Union[str, Path]) -> Optional[dict[str, float]]:
@@ -57,18 +56,16 @@ def get_settings() -> Settings:
         if config is None:
             return settings
 
-        for item in Settings.__fields__.keys():
+        for item in Settings.model_fields.keys():
             if item in config:
                 setattr(settings, item, config[item])
 
         return settings
 
     if local_env_file.exists():
-        dotenv.load_dotenv(dotenv_path=local_env_file)
-        return Settings()
+        return Settings(_env_file=local_env_file)
 
     if home_env_file.exists():
-        dotenv.load_dotenv(dotenv_path=home_env_file)
-        return Settings()
+        return Settings(_env_file=home_env_file)
 
     return Settings()

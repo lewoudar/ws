@@ -141,10 +141,10 @@ class TestClient:
                 nursery.start_soon(self.worker, url)
 
         expected = (
-            f"Connection was rejected by {url}\n"
-            f"status code = {status_code}\n"
-            f"headers = {expected_headers}\n"
-            f"body = {body.decode()}\n"
+            f'Connection was rejected by {url}\n'
+            f'status code = {status_code}\n'
+            f'headers = {expected_headers}\n'
+            f'body = {body.decode()}\n'
         )
 
         assert capsys.readouterr().out == expected
@@ -157,7 +157,7 @@ class TestClient:
 
         output = capsys.readouterr().out
         assert 'connect_timeout' in output
-        assert 'not a valid float' in output
+        assert 'float_parsing' in output
 
     async def test_should_connect_and_read_message_from_server_without_tls(self, nursery):
         await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)

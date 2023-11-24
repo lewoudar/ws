@@ -5,30 +5,16 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: local
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
     hooks:
-      - id: isort
-        name: isort
-        entry: poetry run isort ws tests
-        language: system
-        types:
-          - python
-      - id: black
-        name: black
-        entry: poetry run black ws tests
-        language: system
-        types:
-          - python
-      - id: bandit
-        name: bandit
-        entry: poetry run bandit -r ws
-        language: system
+      # Run the linter.
+      - id: ruff
         exclude: ^tests
-        types:
-          - python
-      - id: flake8
-        name: flake8
-        entry: poetry run flake8
-        language: system
-        types:
-          - python
+      # Run the formatter.
+      - id: ruff-format
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        exclude: ^tests

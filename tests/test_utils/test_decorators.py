@@ -47,7 +47,7 @@ class TestCatchPydanticError:
 
         output = capsys.readouterr().out
         assert 'connect_timeout' in output
-        assert 'not a valid float' in output
+        assert 'float_parsing' in output
 
     async def test_should_not_raise_error_when_program_runs_correctly(self, capsys):
         @catch_pydantic_error

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "websockets-cli"
-version = "0.2.1"
+version = "0.3.0"
 description = "A simple yet powerful websocket cli"
 authors = ["le_woudar <lewoudar@gmail.com>"]
 readme = "README.md"
@@ -29,17 +29,17 @@ packages = [
 "Changelog" = "https://github.com/lewoudar/ws/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
-trio-websocket = "^0.9.2"
-rich = "^13.0.0"
-pydantic = "^1.9.0"
+python = "^3.8"
+trio-websocket = "^0.11.1"
+rich = "^13.7.0"
+pydantic = "^2.5.2"
 tomli = "^2.0.1"
-click = "^8.0.4"
-python-dotenv = "^0.21.0"
-certifi = "^2022.12.7"
+click = "^8.1.7"
+certifi = "^2023.11.17"
 click-didyoumean = "^0.3.0"
-shellingham = "^1.4.0"
-prompt-toolkit = "^3.0.29"
+shellingham = "^1.5.0"
+prompt-toolkit = "^3.0.41"
+pydantic-settings = "^2.1.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.0.0"
@@ -50,15 +50,12 @@ cffi = "^1.15.0"
 pytest-mock = "^3.7.0"
 mock = "^5.0.0"
 trustme = "^0.9.0"
-ipython = "7.32"
 freezegun = "^1.2.1"
-nox = "^2022.1.7"
+nox = "^2023.4.22"
 
 [tool.poetry.group.lint.dependencies]
-isort = "^5.10.1"
 bandit = "^1.7.4"
-flake8 = "^3.9.2"
-black = "^23.1.0"
+ruff = "^0.1.6"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.4.0"
@@ -67,21 +64,35 @@ mkdocs-material = "^9.0.0"
 [tool.poetry.group.security.dependencies]
 safety = "^2.3.0"
 
+[tool.poetry.group.dev.dependencies]
+bump-pydantic = "^0.7.0"
+ipython = "7.32"
+
 [tool.poetry.scripts]
 ws = "ws.main:cli"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=ws --cov-report html --cov-report xml"
+addopts = "--cov=ws --cov-report html --cov-report xml --cov-report term"
 trio_mode = true
 
-[tool.isort]
-line_length = 120
-profile = "black"
-
-[tool.black]
+[tool.ruff]
 line-length = 120
-skip-string-normalization = true
+target-version = "py38"
+
+[tool.ruff.lint]
+extend-select = [
+  "UP",  # pyupgrade
+  "I",   # isort
+  "S",   # flake8-bandit
+  "B",   # flake8-bugbear
+  "C90", # McCabe complexity
+  "RUF"
+]
+ignore = ["RUF012", "UP007", "UP006"]
+
+[tool.ruff.format]
+quote-style = "single"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

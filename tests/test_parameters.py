@@ -9,7 +9,7 @@ from ws.parameters import ByteParamType, HostParamType, TextParamType, WsUrlPara
 class TestWsUrlParamType:
     """Tests parameter WsUrlParamType"""
 
-    @pytest.mark.parametrize('url', ['ws:/websocket', 'https://websocket.com', ':8000f'])
+    @pytest.mark.parametrize('url', ['https://websocket.com', ':8000f'])
     def test_should_raise_error_when_given_value_is_not_a_websocket_url(self, url):
         param = WsUrlParamType()
 
@@ -21,9 +21,9 @@ class TestWsUrlParamType:
     @pytest.mark.parametrize(
         ('given_url', 'expected_url'),
         [
-            ('ws://websocket.com', 'ws://websocket.com'),
-            ('wss://websocket.com', 'wss://websocket.com'),
-            (':8000', 'ws://localhost:8000'),
+            ('ws://websocket.com', 'ws://websocket.com/'),
+            ('wss://websocket.com', 'wss://websocket.com/'),
+            (':8000', 'ws://localhost:8000/'),
         ],
     )
     def test_should_return_websocket_url(self, given_url, expected_url):

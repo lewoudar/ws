@@ -1,4 +1,5 @@
 import ssl
+from typing import Optional
 
 import click
 import trio
@@ -23,7 +24,7 @@ async def request_handler(request: WebSocketRequest) -> None:
             break
 
 
-async def run_server(host: str, port: int, cert_file: str = None, key_file: str = None) -> None:
+async def run_server(host: str, port: int, cert_file: Optional[str] = None, key_file: Optional[str] = None) -> None:
     if key_file is not None and cert_file is None:
         raise click.UsageError('You cannot provide a private key file without the certificate.')
 
@@ -35,7 +36,7 @@ async def run_server(host: str, port: int, cert_file: str = None, key_file: str 
             ssl_context.load_cert_chain(cert_file, keyfile=key_file)
         except ssl.SSLError:
             console.print('[error]Unable to set up TLS. Please check the files you provided are correct.')
-            raise SystemExit(1)
+            raise SystemExit(1) from None
 
     console.print(f'[info]Running server on {host}:{port} :dizzy:')
     await serve_websocket(
@@ -50,7 +51,7 @@ async def run_server(host: str, port: int, cert_file: str = None, key_file: str 
     )
 
 
-async def main(host: str, port: int, cert_file: str = None, key_file: str = None) -> None:
+async def main(host: str, port: int, cert_file: Optional[str] = None, key_file: Optional[str] = None) -> None:
     async with trio.open_nursery() as nursery:
         nursery.start_soon(function_runner, nursery.cancel_scope, run_server, host, port, cert_file, key_file)
         nursery.start_soon(signal_handler, nursery.cancel_scope)
@@ -70,7 +71,7 @@ async def main(host: str, port: int, cert_file: str = None, key_file: str = None
 @click.option(
     '-k', '--key-file', type=click.Path(exists=True, dir_okay=False), help='Private key bound to the certificate.'
 )
-def echo_server(host: str, port: int, cert_file: str = None, key_file: str = None):
+def echo_server(host: str, port: int, cert_file: Optional[str] = None, key_file: Optional[str] = None):
     """
     Runs an echo websocket server.
     The server will return the data sent by the client.
