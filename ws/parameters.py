@@ -1,10 +1,10 @@
 import ipaddress
 import re
-from typing import Annotated, AnyStr, Optional, Union
+from typing import AnyStr, Optional, Union
 
 import click
 from pydantic import AnyUrl, BaseModel, UrlConstraints, ValidationError
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 
 class WsUrlModel(BaseModel):
