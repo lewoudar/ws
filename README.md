@@ -4,7 +4,7 @@
 ![](https://github.com/lewoudar/ws/workflows/CI/badge.svg)
 [![Coverage Status](https://codecov.io/gh/lewoudar/ws/branch/main/graphs/badge.svg?branch=main)](https://codecov.io/gh/lewoudar/ws)
 [![Documentation Status](https://readthedocs.org/projects/pyws/badge/?version=latest)](https://pyws.readthedocs.io/en/latest/?badge=latest)
-[![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/lewoudar/ws)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/lewoudar/ws)
 [![License Apache 2](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
 A simple yet powerful websocket cli.
