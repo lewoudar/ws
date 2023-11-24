@@ -1,18 +1,14 @@
 import ipaddress
 import re
-from typing import AnyStr, Optional, Union
+from typing import Annotated, AnyStr, Optional, Union
 
 import click
-from pydantic import AnyUrl, BaseModel, ValidationError
+from pydantic import AnyUrl, BaseModel, UrlConstraints, ValidationError
 from typing_extensions import Literal
 
 
-class WsUrl(AnyUrl):
-    allowed_schemes = {'ws', 'wss'}
-
-
 class WsUrlModel(BaseModel):
-    url: WsUrl
+    url: Annotated[AnyUrl, UrlConstraints(allowed_schemes=['ws', 'wss'])]
 
 
 class HostModel(BaseModel):
@@ -26,8 +22,10 @@ class WsUrlParamType(click.ParamType):
         if re.match(r':\d+$', value):
             value = f'ws://localhost{value}'
         try:
-            WsUrlModel(url=value)
-            return value
+            model = WsUrlModel(url=value)
+            # we return the normalized url. For example if a user passes "ws:/foo.com" which is not normally valid
+            # Pydantic will convert it to "ws://foo.com/" which is valid.
+            return str(model.url)
         except ValidationError:
             self.fail(f'{value} is not a valid websocket url', param, ctx)
 

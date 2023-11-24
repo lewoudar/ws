@@ -157,7 +157,7 @@ class TestClient:
 
         output = capsys.readouterr().out
         assert 'connect_timeout' in output
-        assert 'not a valid float' in output
+        assert 'float_parsing' in output
 
     async def test_should_connect_and_read_message_from_server_without_tls(self, nursery):
         await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)

@@ -21,7 +21,9 @@ from ws.utils.io import function_runner, signal_handler, sleep_until
 
 @catch_too_slow_error
 @catch_pydantic_error
-async def make_ping(url: str, number: int, interval: float, message: Optional[bytes] = None, filename: Optional[str] = None) -> None:
+async def make_ping(
+    url: str, number: int, interval: float, message: Optional[bytes] = None, filename: Optional[str] = None
+) -> None:
     settings = get_settings()
     configure_console_recording(console, settings, filename)
     # trio_websocket by default sends 32 bytes if no payload is given
@@ -44,7 +46,12 @@ async def make_ping(url: str, number: int, interval: float, message: Optional[by
 
 
 async def main(
-    url: str, number: int, interval: float, message: Optional[bytes] = None, duration: Optional[float] = None, filename: Optional[str] = None
+    url: str,
+    number: int,
+    interval: float,
+    message: Optional[bytes] = None,
+    duration: Optional[float] = None,
+    filename: Optional[str] = None,
 ) -> None:
     async with trio.open_nursery() as nursery:
         nursery.start_soon(function_runner, nursery.cancel_scope, make_ping, url, number, interval, message, filename)

@@ -1,5 +1,3 @@
-import platform
-
 import pytest
 from trio_websocket import serve_websocket
 
@@ -62,14 +60,10 @@ async def test_should_send_raw_message_and_print_its_length(capsys, nursery, moc
 
 
 @pytest.mark.parametrize('command', ['text', 'byte'])
-@pytest.mark.skipif(
-    platform.system() == 'Windows',
-    reason='for an unknown reason, the temporary file is not created as expected on windows runner',
-)
 async def test_should_send_message_in_file_and_print_its_length(capsys, tmp_path, nursery, mock_input, command):
     file_path = tmp_path / 'file.txt'
     file_path.write_text('hello world')
-    mock_input.send_text(f'{command} file@{file_path}\nquit\n')
+    mock_input.send_text(f'{command} "file@{file_path}"\nquit\n')
 
     await nursery.start(serve_websocket, server_handler, 'localhost', 1234, None)
     await main('ws://localhost:1234')

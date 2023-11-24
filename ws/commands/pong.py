@@ -18,7 +18,9 @@ from ws.settings import get_settings
 from ws.utils.io import function_runner, signal_handler, sleep_until
 
 
-async def make_pong(url: str, number: int, interval: float, message: Optional[bytes] = None, filename: Optional[str] = None) -> None:
+async def make_pong(
+    url: str, number: int, interval: float, message: Optional[bytes] = None, filename: Optional[str] = None
+) -> None:
     message = b'' if message is None else message
     payload_length = len(message)
     configure_console_recording(console, get_settings(), filename)
@@ -41,7 +43,12 @@ async def make_pong(url: str, number: int, interval: float, message: Optional[by
 
 
 async def main(
-    url: str, number: int, interval: float, message: Optional[bytes] = None, duration: Optional[float] = None, filename: Optional[str] = None
+    url: str,
+    number: int,
+    interval: float,
+    message: Optional[bytes] = None,
+    duration: Optional[float] = None,
+    filename: Optional[str] = None,
 ) -> None:
     async with trio.open_nursery() as nursery:
         nursery.start_soon(function_runner, nursery.cancel_scope, make_pong, url, number, interval, message, filename)

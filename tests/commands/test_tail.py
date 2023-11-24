@@ -55,10 +55,6 @@ def test_should_print_the_last_given_number_of_lines_of_a_file(runner, file_to_r
     assert 'I like async concurrency!\n' * (count - 1) + '\n' == result.output
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == 'PyPy' or platform.system() == 'Windows',
-    reason="I don't know why it does not work on pypy or windows",
-)
 async def test_should_follow_given_file(capsys, file_to_read, signal_message):
     async def update_file(file_path: pathlib.Path) -> None:
         async with await trio.open_file(file_path, 'a') as f:
@@ -73,6 +69,10 @@ async def test_should_follow_given_file(capsys, file_to_read, signal_message):
         await update_file(file_to_read)
 
     expected = 'I like async concurrency!\n' * 9 + f'\nhello\nworld\n{signal_message(signal.SIGINT)}'
+    # Windows magic!
+    if platform.system() == 'Windows':
+        expected = expected.replace('I like async concurrency!\n', 'I like async concurrency!\r\n')
+
     assert capsys.readouterr().out == expected
 
 

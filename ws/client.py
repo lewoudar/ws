@@ -18,9 +18,9 @@ from ws.settings import get_settings
 
 def get_client_ssl_context(
     ca_file: Optional[str] = None,
-        certificate: Optional[str] = None,
-        keyfile: Optional[str] = None,
-        password: Optional[str] = None
+    certificate: Optional[str] = None,
+    keyfile: Optional[str] = None,
+    password: Optional[str] = None,
 ) -> Optional[ssl.SSLContext]:
     context = None
     if ca_file:

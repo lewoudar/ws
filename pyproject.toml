@@ -32,14 +32,14 @@ packages = [
 python = "^3.8"
 trio-websocket = "^0.11.1"
 rich = "^13.7.0"
-pydantic = "^1.9.0"
+pydantic = "^2.5.2"
 tomli = "^2.0.1"
 click = "^8.1.7"
-python-dotenv = "^0.21.0"
 certifi = "^2023.11.17"
 click-didyoumean = "^0.3.0"
 shellingham = "^1.5.0"
 prompt-toolkit = "^3.0.41"
+pydantic-settings = "^2.1.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.0.0"
@@ -50,9 +50,8 @@ cffi = "^1.15.0"
 pytest-mock = "^3.7.0"
 mock = "^5.0.0"
 trustme = "^0.9.0"
-ipython = "7.32"
 freezegun = "^1.2.1"
-nox = "^2022.1.7"
+nox = "^2023.4.22"
 
 [tool.poetry.group.lint.dependencies]
 bandit = "^1.7.4"
@@ -64,6 +63,10 @@ mkdocs-material = "^9.0.0"
 
 [tool.poetry.group.security.dependencies]
 safety = "^2.3.0"
+
+[tool.poetry.group.dev.dependencies]
+bump-pydantic = "^0.7.0"
+ipython = "7.32"
 
 [tool.poetry.scripts]
 ws = "ws.main:cli"

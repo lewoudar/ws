@@ -162,7 +162,7 @@ def test_should_check_trio_run_is_correctly_called_without_options(runner, mocke
     result = runner.invoke(cli, ['listen', 'ws://localhost:1234'])
 
     assert result.exit_code == 0
-    run_mock.assert_called_once_with(main, 'ws://localhost:1234', False, None, None)
+    run_mock.assert_called_once_with(main, 'ws://localhost:1234/', False, None, None)
 
 
 @pytest.mark.parametrize(
@@ -177,4 +177,4 @@ def test_should_check_trio_run_is_correctly_called_with_options(
     )
 
     assert result.exit_code == 0
-    run_mock.assert_called_once_with(main, 'ws://localhost:1234', True, 2.0, 'record.txt')
+    run_mock.assert_called_once_with(main, 'ws://localhost:1234/', True, 2.0, 'record.txt')

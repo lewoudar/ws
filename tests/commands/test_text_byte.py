@@ -34,7 +34,7 @@ async def test_should_send_given_message(capsys, nursery, message):
 @pytest.mark.parametrize(('command', 'expected'), [('byte', b'hello'), ('text', 'hello')])
 def test_should_check_trio_run_is_correctly_called_with_given_message(runner, mocker, command, expected):
     run_mock = mocker.patch('trio.run')
-    url = 'ws://localhost:1234'
+    url = 'ws://localhost:1234/'
     message = 'hello'
     result = runner.invoke(cli, [command, url, message])
 
@@ -45,7 +45,7 @@ def test_should_check_trio_run_is_correctly_called_with_given_message(runner, mo
 @pytest.mark.parametrize(('command', 'expected'), [('byte', b'hello'), ('text', 'hello')])
 def test_should_check_trio_run_is_correctly_called_with_given_file(tmp_path, runner, mocker, command, expected):
     run_mock = mocker.patch('trio.run')
-    url = 'ws://localhost:1234'
+    url = 'ws://localhost:1234/'
     dummy_path = tmp_path / 'dummy.txt'
     dummy_path.write_text('hello')
     result = runner.invoke(cli, [command, url, f'file@{dummy_path}'])

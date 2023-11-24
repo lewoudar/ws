@@ -18,7 +18,7 @@ def test_should_print_error_when_url_argument_is_not_given(runner, command):
     assert "Missing argument 'URL'" in result.output
 
 
-@pytest.mark.parametrize('url', ['ws:/websocket', 'https://websocket.com'])
+@pytest.mark.parametrize('url', ['wsss:/websocket', 'https://websocket.com'])
 @command_parametrize
 def test_should_print_error_when_given_url_is_not_a_websocket_url(runner, url, command):
     result = runner.invoke(cli, [command, url])
@@ -94,7 +94,7 @@ def test_should_print_error_when_ping_settings_are_not_correct(monkeypatch, runn
 
     assert result.exit_code == 1
     assert 'connect_timeout' in result.output
-    assert 'not a valid float' in result.output
+    assert 'float_parsing' in result.output
 
 
 async def test_should_make_a_one_ping_with_default_values(capsys, nursery):
@@ -180,7 +180,7 @@ async def test_should_save_terminal_output_in_a_file(capsys, tmp_path, nursery, 
 @pytest.mark.parametrize(('command', 'ping_pong'), [('ping', main_ping), ('pong', main_pong)])
 def test_should_check_trio_run_is_correctly_called_without_arguments(runner, mocker, command, ping_pong):
     run_mock = mocker.patch('trio.run')
-    url = 'ws://localhost'
+    url = 'ws://localhost/'
     result = runner.invoke(cli, [command, url])
 
     assert result.exit_code == 0
@@ -221,5 +221,5 @@ def test_should_check_trio_run_is_correctly_called_with_arguments(
 
     assert result.exit_code == 0
     run_mock.assert_called_once_with(
-        ping_pong, 'ws://localhost:8000', number, interval, message.encode(), duration, filename
+        ping_pong, 'ws://localhost:8000/', number, float(interval), message.encode(), float(duration), filename
     )

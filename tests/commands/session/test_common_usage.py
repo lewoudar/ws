@@ -63,7 +63,7 @@ async def test_should_continue_prompting_user_if_input_is_empty(capsys, nursery,
 @pytest.mark.usefixtures('reset_console')
 @pytest.mark.skipif(
     platform.system() == 'Windows',
-    reason='for an unknown reason, the temporary file is not created as expected on windows runner',
+    reason='for an unknown reason, the temporary SVG file is not created as expected on windows runner',
 )
 async def test_should_print_input_and_save_it_in_a_file(capsys, tmp_path, nursery, mock_input, filename):
     file_path = tmp_path / filename
@@ -95,7 +95,7 @@ async def test_should_print_input_and_save_it_in_a_file(capsys, tmp_path, nurser
 
 def test_should_check_trio_run_is_correctly_called_without_options(runner, mocker):
     run_mock = mocker.patch('trio.run')
-    url = 'ws://localhost:1234'
+    url = 'ws://localhost:1234/'
     result = runner.invoke(cli, ['session', url])
 
     assert result.exit_code == 0
@@ -109,4 +109,4 @@ def test_should_check_trio_run_is_correctly_called_with_options(tmp_path, runner
     result = runner.invoke(cli, ['session', ':1234', filename_option, f'{file_path}'])
 
     assert result.exit_code == 0
-    run_mock.assert_called_once_with(main, 'ws://localhost:1234', f'{file_path}')
+    run_mock.assert_called_once_with(main, 'ws://localhost:1234/', f'{file_path}')
