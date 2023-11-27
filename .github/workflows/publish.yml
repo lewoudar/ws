@@ -19,7 +19,7 @@ jobs:
       - name: Install python pre-requisites
         run: python -m pip install -U pip nox pipx
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install "poetry<1.8.0"
       - name: Build and deploy
         run: nox -s deploy
         env:

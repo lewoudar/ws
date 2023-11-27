@@ -32,7 +32,7 @@ jobs:
       - name: Install python pre-requisites
         run: python -m pip install -U pip nox pipx
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install "poetry<1.8.0"
       - name: Lint
         run: nox -s lint
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
