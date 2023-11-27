@@ -1,7 +1,7 @@
 # websockets-cli
 
 [![Pypi version](https://img.shields.io/pypi/v/websockets-cli.svg)](https://pypi.org/project/websockets-cli/)
-![](https://github.com/lewoudar/ws/workflows/CI/badge.svg)
+[![](https://github.com/lewoudar/ws/workflows/CI/badge.svg)](https://github.com/lewoudar/ws/actions)
 [![Coverage Status](https://codecov.io/gh/lewoudar/ws/branch/main/graphs/badge.svg?branch=main)](https://codecov.io/gh/lewoudar/ws)
 [![Documentation Status](https://readthedocs.org/projects/pyws/badge/?version=latest)](https://pyws.readthedocs.io/en/latest/?badge=latest)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/lewoudar/ws)
