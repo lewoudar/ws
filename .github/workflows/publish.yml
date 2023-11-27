@@ -16,8 +16,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-      - name: Install python dependencies
-        run: python -m pip install -U pip nox
+      - name: Install python pre-requisites
+        run: python -m pip install -U pip nox pipx
+      - name: Install poetry
+        run: pipx install poetry
       - name: Build and deploy
         run: nox -s deploy
         env:
