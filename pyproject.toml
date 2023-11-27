@@ -66,7 +66,7 @@ safety = "^2.3.0"
 
 [tool.poetry.group.dev.dependencies]
 bump-pydantic = "^0.7.0"
-ipython = "7.32"
+ipython = "8.10.0"
 
 [tool.poetry.scripts]
 ws = "ws.main:cli"
