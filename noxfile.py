@@ -15,6 +15,7 @@ def lint(session):
     source_code = 'ws'
     session.run('poetry', 'install', '--only', 'lint')
     session.run('ruff', 'check', source_code)
+    session.run('ruff', 'format', '.')
     session.run('bandit', '-r', source_code)
 
 
