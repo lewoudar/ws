@@ -29,7 +29,8 @@ packages = [
 "Changelog" = "https://github.com/lewoudar/ws/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+# pyinstaller forces me to restraint the python version like this
+python = ">=3.8,<3.13"
 trio-websocket = "^0.11.1"
 rich = "^13.7.0"
 pydantic = "^2.5.2"
@@ -67,6 +68,9 @@ safety = "^2.3.0"
 [tool.poetry.group.dev.dependencies]
 bump-pydantic = "^0.7.0"
 ipython = "8.10.0"
+
+[tool.poetry.group.build.dependencies]
+pyinstaller = "^6.3.0"
 
 [tool.poetry.scripts]
 ws = "ws.main:cli"
