@@ -40,5 +40,5 @@ for command in [tail, ping, pong, echo_server, listen, byte, text, install_compl
     cli.add_command(command)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     cli()
