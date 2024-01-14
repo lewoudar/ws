@@ -2,14 +2,14 @@ import click
 from click_didyoumean import DYMGroup
 from rich.traceback import install
 
-from .commands.completion import install_completion
-from .commands.echo_server import echo_server
-from .commands.listen import listen
-from .commands.ping import ping
-from .commands.pong import pong
-from .commands.session import session
-from .commands.tail import tail
-from .commands.text_byte import byte, text
+from ws.commands.completion import install_completion
+from ws.commands.echo_server import echo_server
+from ws.commands.listen import listen
+from ws.commands.ping import ping
+from ws.commands.pong import pong
+from ws.commands.session import session
+from ws.commands.tail import tail
+from ws.commands.text_byte import byte, text
 
 install(show_locals=True)
 
@@ -38,3 +38,7 @@ def cli():
 
 for command in [tail, ping, pong, echo_server, listen, byte, text, install_completion, session]:
     cli.add_command(command)
+
+
+if __name__ == '__main__':  # pragma: no cover
+    cli()
