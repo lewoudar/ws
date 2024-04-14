@@ -29,18 +29,20 @@ packages = [
 "Changelog" = "https://github.com/lewoudar/ws/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
-# pyinstaller forces me to restraint the python version like this
-python = ">=3.8,<3.13"
+python = "^3.8"
 trio-websocket = "^0.11.1"
-rich = "^13.7.0"
-pydantic = "^2.5.2"
+rich = "^13.7.1"
+pydantic = "^2.7.0"
 tomli = "^2.0.1"
 click = "^8.1.7"
-certifi = "^2023.11.17"
-click-didyoumean = "^0.3.0"
+certifi = "^2024.2.2"
+click-didyoumean = "^0.3.1"
 shellingham = "^1.5.0"
 prompt-toolkit = "^3.0.41"
-pydantic-settings = "^2.1.0"
+pydantic-settings = "^2.2.1"
+# I need this dependency pin until this issue is resolved
+# https://github.com/python-trio/trio-websocket/issues/187
+trio = "<0.24.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.0.0"
@@ -68,9 +70,6 @@ safety = "^2.3.0"
 [tool.poetry.group.dev.dependencies]
 bump-pydantic = "^0.7.0"
 ipython = "8.10.0"
-
-[tool.poetry.group.build.dependencies]
-pyinstaller = "^6.3.0"
 
 [tool.poetry.scripts]
 ws = "ws.main:cli"

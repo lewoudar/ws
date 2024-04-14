@@ -13,7 +13,7 @@ ENV_FILE = '.ws.env'
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix='ws_')
+    model_config = SettingsConfigDict(env_prefix='ws_', extra='ignore')
     connect_timeout: float = Field(5.0, gt=0)
     disconnect_timeout: float = Field(5.0, gt=0)
     response_timeout: float = Field(5.0, gt=0)
